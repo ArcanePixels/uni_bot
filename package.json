@@ -1,0 +1,20 @@
+{
+  "name": "discord-allrounder",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "workspaces": [
+    "shared",
+    "bot",
+    "api",
+    "dashboard"
+  ],
+  "scripts": {
+    "test": "node --test \"bot/test/*.test.js\" \"api/test/*.test.js\" \"dashboard/test/*.test.js\"",
+    "start:bot": "node bot/src/index.js",
+    "start:api": "node api/src/index.js"
+  },
+  "allowScripts": {
+    "better-sqlite3@11.10.0": true
+  }
+}

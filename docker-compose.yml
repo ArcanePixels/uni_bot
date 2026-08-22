@@ -1,0 +1,98 @@
+services:
+  bot:
+    # Fertiges Image (per "docker load" eingespielt). Das "build" darunter
+    # greift nur, wenn das Image fehlt und du selbst bauen willst.
+    image: allrounder-bot:latest
+    build:
+      context: .
+      dockerfile: bot/Dockerfile
+    container_name: allrounder-bot
+    restart: unless-stopped
+    environment:
+      DISCORD_TOKEN: ${DISCORD_TOKEN:?DISCORD_TOKEN fehlt in der .env}
+      DATABASE_PATH: /data/bot.sqlite
+      LOG_LEVEL: ${LOG_LEVEL:-info}
+      YOUTUBE_INTERVAL_MS: ${YOUTUBE_INTERVAL_MS:-600000}
+      PLUGIN_DIR: /plugins
+    volumes:
+      - botdata:/data
+      # Eigene Plugins: Datei nach ./plugins legen und den Bot neu starten.
+      # Nur lesend eingebunden - der Bot soll dort nichts veraendern.
+      - ./plugins:/plugins:ro
+
+  api:
+    image: allrounder-api:latest
+    build:
+      context: .
+      dockerfile: api/Dockerfile
+    container_name: allrounder-api
+    restart: unless-stopped
+    environment:
+      API_TOKEN: ${API_TOKEN:?API_TOKEN fehlt in der .env}
+      # Die API nutzt den Bot-Token nur lesend, um dem Dashboard die Kanal-
+      # und Rollenlisten zu liefern.
+      DISCORD_TOKEN: ${DISCORD_TOKEN}
+      DATABASE_PATH: /data/bot.sqlite
+      API_PORT: 8080
+      # Automatische Sicherung. BACKUP_CRON leer setzen schaltet sie ab.
+      BACKUP_DIR: /data/backups
+      BACKUP_CRON: ${BACKUP_CRON-0 4 * * *}
+      BACKUP_KEEP_DAYS: ${BACKUP_KEEP_DAYS:-14}
+      # Wer Sicherungen abrufen darf (Discord-User-IDs, kommagetrennt).
+      OWNER_IDS: ${OWNER_IDS:-}
+    ports:
+      # Nur auf localhost binden - nach aussen geht es spaeter ueber den
+      # Cloudflare Tunnel, nicht ueber einen offenen Port am Router.
+      # Das Dashboard erreicht die API ohnehin ueber das Docker-Netz.
+      - "127.0.0.1:${API_PORT:-8080}:8080"
+    volumes:
+      - botdata:/data
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://localhost:8080/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
+  dashboard:
+    image: allrounder-dashboard:latest
+    build:
+      context: .
+      dockerfile: dashboard/Dockerfile
+    container_name: allrounder-dashboard
+    restart: unless-stopped
+    depends_on:
+      api:
+        condition: service_healthy
+    environment:
+      # Erreichbar unter dem Servicenamen im Docker-Netz.
+      API_URL: http://api:8080
+      API_TOKEN: ${API_TOKEN:?API_TOKEN fehlt in der .env}
+      DISCORD_CLIENT_ID: ${DISCORD_CLIENT_ID:?DISCORD_CLIENT_ID fehlt in der .env}
+      DISCORD_CLIENT_SECRET: ${DISCORD_CLIENT_SECRET:?DISCORD_CLIENT_SECRET fehlt in der .env}
+      AUTH_SECRET: ${AUTH_SECRET:?AUTH_SECRET fehlt in der .env}
+      # Muss exakt der Adresse entsprechen, unter der du das Dashboard aufrufst,
+      # sonst schlaegt der Discord-Login mit "invalid redirect_uri" fehl.
+      AUTH_URL: ${AUTH_URL:?AUTH_URL fehlt in der .env}
+      AUTH_TRUST_HOST: "true"
+    ports:
+      - "${DASHBOARD_PORT:-3000}:3000"
+
+  # Optional: HTTPS-Zugang von aussen ohne offenen Port am Router.
+  # Startet nur mit:  docker compose --profile tunnel up -d
+  # Einrichtung siehe docs/cloudflare-tunnel.md
+  cloudflared:
+    image: cloudflare/cloudflared:latest
+    container_name: allrounder-tunnel
+    restart: unless-stopped
+    profiles: [tunnel]
+    depends_on:
+      - dashboard
+    command: tunnel --no-autoupdate run
+    environment:
+      # Ohne :? - eine Pflichtpruefung wuerde sonst auch dann greifen, wenn der
+      # Dienst mangels Profil gar nicht startet, und jeden normalen Start
+      # blockieren. Fehlt das Token, meldet cloudflared das selbst.
+      TUNNEL_TOKEN: ${CLOUDFLARE_TUNNEL_TOKEN:-}
+
+volumes:
+  botdata:

@@ -1,0 +1,884 @@
+/* ArcanePixels Dashboard
+ *
+ * Grundgeruest: kuehles Anthrazit mit einem Hauch Blauviolett, damit es neben
+ * Discord nicht fremd wirkt, aber eigenstaendig bleibt.
+ *
+ * --accent wird pro Server aus dessen Icon berechnet und zur Laufzeit gesetzt
+ * (siehe AccentProvider). Der Wert hier ist die ArcanePixels-Markenfarbe und
+ * gilt ueberall, wo noch kein Server gewaehlt ist.
+ */
+
+:root {
+  --bg: #0e0f14;
+  --bg-elevated: #14161d;
+  --surface: #191c25;
+  --surface-2: #21242f;
+  --surface-3: #2a2e3b;
+  --border: #2c303c;
+  --border-strong: #3a3f4f;
+
+  --text: #e8eaf0;
+  --text-dim: #9aa0b0;
+  --text-faint: #6b7180;
+
+  --accent: #7c5cff;
+  --accent-soft: rgba(124, 92, 255, 0.14);
+  --accent-text: #ffffff;
+
+  --danger: #f0484f;
+  --danger-soft: rgba(240, 72, 79, 0.12);
+  --success: #35c48a;
+  --success-soft: rgba(53, 196, 138, 0.12);
+  --warning: #f0a83c;
+  --warning-soft: rgba(240, 168, 60, 0.12);
+
+  --radius: 10px;
+  --radius-sm: 7px;
+  --radius-lg: 14px;
+
+  --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 4px 16px rgba(0, 0, 0, 0.2);
+  --ring: 0 0 0 3px var(--accent-soft);
+
+  --font: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-mono: ui-monospace, "Cascadia Code", "Segoe UI Mono", Menlo, monospace;
+
+  /* Wird ueberwiegend am Rechner bedient - bei elf Reitern waere es sonst
+     zu eng und die Beschriftungen wuerden abgeschnitten. */
+  --page-width: 1440px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font);
+  font-size: 15px;
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+}
+
+a {
+  color: var(--accent);
+  text-decoration: none;
+}
+a:hover {
+  text-decoration: underline;
+}
+
+code {
+  font-family: var(--font-mono);
+  font-size: 0.88em;
+  background: var(--surface-2);
+  padding: 1px 5px;
+  border-radius: 4px;
+  color: var(--text-dim);
+}
+
+h1,
+h2,
+h3 {
+  letter-spacing: -0.01em;
+  margin: 0;
+}
+
+/* ---------- Aufbau ---------- */
+
+.container {
+  max-width: var(--page-width);
+  margin: 0 auto;
+  padding: 28px 24px 80px;
+}
+
+.page-head {
+  margin-bottom: 22px;
+  max-width: 820px;
+}
+.page-head h1 {
+  font-size: 21px;
+  font-weight: 600;
+}
+.page-head p {
+  color: var(--text-dim);
+  font-size: 14px;
+  margin: 4px 0 0;
+}
+
+/* ---------- Kopfleiste ---------- */
+
+.topbar {
+  background: var(--bg-elevated);
+  border-bottom: 1px solid var(--border);
+  position: sticky;
+  top: 0;
+  z-index: 20;
+}
+.topbar .inner {
+  max-width: var(--page-width);
+  margin: 0 auto;
+  padding: 0 24px;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  font-weight: 600;
+  color: var(--text);
+  font-size: 15px;
+  letter-spacing: -0.01em;
+}
+.brand:hover {
+  text-decoration: none;
+}
+.brand-mark {
+  width: 26px;
+  height: 26px;
+  border-radius: 7px;
+  background: linear-gradient(135deg, var(--accent), color-mix(in srgb, var(--accent) 50%, #1b1f2b));
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+}
+.crumb {
+  color: var(--text-faint);
+}
+.crumb-name {
+  color: var(--text-dim);
+  font-size: 14px;
+}
+.spacer {
+  flex: 1;
+}
+.user-chip {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--text-dim);
+}
+.user-chip img {
+  border-radius: 50%;
+}
+
+/* ---------- Reiter ---------- */
+
+.tabs {
+  display: flex;
+  gap: 2px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 24px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.tabs::-webkit-scrollbar {
+  display: none;
+}
+.tabs a {
+  padding: 9px 14px;
+  flex-shrink: 0;
+  color: var(--text-dim);
+  border-bottom: 2px solid transparent;
+  white-space: nowrap;
+  font-size: 14px;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  transition: color 0.12s;
+}
+.tabs a:hover {
+  color: var(--text);
+  text-decoration: none;
+}
+.tabs a.active {
+  color: var(--text);
+  border-bottom-color: var(--accent);
+}
+.tabs svg {
+  opacity: 0.75;
+}
+.tabs a.active svg {
+  opacity: 1;
+  color: var(--accent);
+}
+
+/* ---------- Karten ---------- */
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 22px;
+  margin-bottom: 16px;
+}
+.card-head {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+.card-head .icon {
+  width: 34px;
+  height: 34px;
+  border-radius: var(--radius-sm);
+  background: var(--accent-soft);
+  color: var(--accent);
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+}
+.card h2 {
+  font-size: 16px;
+  font-weight: 600;
+}
+.card .desc {
+  color: var(--text-dim);
+  font-size: 13.5px;
+  margin: 3px 0 0;
+  max-width: 760px;
+}
+.card-head .spacer {
+  flex: 1;
+}
+
+/* ---------- Statistik-Kacheln ---------- */
+
+.stat-grid {
+  display: grid;
+  /* auto-fit statt auto-fill: leere Spalten fallen zusammen, die vorhandenen
+     Kacheln teilen sich die Zeile gleichmaessig auf. */
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 12px;
+  margin-bottom: 16px;
+}
+.stat {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px 18px;
+}
+.stat .label {
+  color: var(--text-dim);
+  font-size: 12.5px;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 6px;
+}
+.stat .value {
+  font-size: 25px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+}
+.stat .sub {
+  color: var(--text-faint);
+  font-size: 12.5px;
+  margin-top: 3px;
+}
+.stat.ok .value {
+  color: var(--success);
+}
+.stat.off .value {
+  color: var(--text-faint);
+}
+
+/* ---------- Formularfelder ---------- */
+
+.field {
+  margin-bottom: 18px;
+  /* Ein Eingabefeld ueber die volle Breite waere unangenehm zu lesen. */
+  max-width: 720px;
+}
+.field:last-child {
+  margin-bottom: 0;
+}
+.field > label {
+  display: block;
+  font-size: 13.5px;
+  font-weight: 500;
+  margin-bottom: 6px;
+  color: var(--text);
+}
+.field .help {
+  color: var(--text-faint);
+  font-size: 12.5px;
+  margin-top: 6px;
+  line-height: 1.5;
+}
+
+input[type="text"],
+input[type="number"],
+input[type="datetime-local"],
+textarea,
+select {
+  width: 100%;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text);
+  padding: 9px 11px;
+  font-size: 14px;
+  font-family: inherit;
+  transition: border-color 0.12s, box-shadow 0.12s;
+}
+input::placeholder,
+textarea::placeholder {
+  color: var(--text-faint);
+}
+input:focus,
+textarea:focus,
+select:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: var(--ring);
+}
+textarea {
+  min-height: 84px;
+  resize: vertical;
+  line-height: 1.5;
+}
+select {
+  cursor: pointer;
+}
+
+/* Schalter */
+.switch {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  cursor: pointer;
+  user-select: none;
+}
+.switch input[type="checkbox"] {
+  appearance: none;
+  width: 38px;
+  height: 22px;
+  border-radius: 999px;
+  background: var(--surface-3);
+  position: relative;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background 0.15s;
+  border: none;
+  margin: 0;
+}
+.switch input[type="checkbox"]::after {
+  content: "";
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #fff;
+  transition: transform 0.15s;
+}
+.switch input[type="checkbox"]:checked {
+  background: var(--accent);
+}
+.switch input[type="checkbox"]:checked::after {
+  transform: translateX(16px);
+}
+.switch input[type="checkbox"]:focus-visible {
+  box-shadow: var(--ring);
+}
+.switch input[type="radio"] {
+  accent-color: var(--accent);
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+}
+.switch .switch-text {
+  font-size: 14px;
+}
+
+/* ---------- Knöpfe ---------- */
+
+button,
+.btn {
+  background: var(--accent);
+  color: var(--accent-text);
+  border: none;
+  border-radius: var(--radius-sm);
+  padding: 9px 16px;
+  font-size: 14px;
+  font-weight: 500;
+  font-family: inherit;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  transition: filter 0.12s, background 0.12s;
+}
+button:hover:not(:disabled),
+.btn:hover {
+  filter: brightness(1.12);
+  text-decoration: none;
+}
+button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+button:focus-visible {
+  outline: none;
+  box-shadow: var(--ring);
+}
+button.secondary {
+  background: var(--surface-2);
+  color: var(--text);
+  border: 1px solid var(--border);
+}
+button.secondary:hover:not(:disabled) {
+  background: var(--surface-3);
+  filter: none;
+}
+button.ghost {
+  background: transparent;
+  color: var(--text-dim);
+  border: 1px solid transparent;
+}
+button.ghost:hover:not(:disabled) {
+  background: var(--surface-2);
+  color: var(--text);
+  filter: none;
+}
+button.danger {
+  background: transparent;
+  color: var(--danger);
+  border: 1px solid var(--border);
+}
+button.danger:hover:not(:disabled) {
+  background: var(--danger);
+  color: #fff;
+  border-color: var(--danger);
+  filter: none;
+}
+button.small {
+  padding: 5px 11px;
+  font-size: 13px;
+}
+
+/* ---------- Merkmale / Listen ---------- */
+
+.tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 9px;
+}
+.tag {
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 3px 5px 3px 11px;
+  font-size: 13px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+.tag .dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.tag button {
+  background: none;
+  border: none;
+  color: var(--text-faint);
+  cursor: pointer;
+  padding: 0;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-size: 15px;
+  line-height: 1;
+}
+.tag button:hover {
+  background: var(--danger-soft);
+  color: var(--danger);
+  filter: none;
+}
+
+/* ---------- Tabellen ---------- */
+
+.table-wrap {
+  overflow-x: auto;
+  margin: 0 -22px -22px;
+  padding: 0 22px 4px;
+}
+/* Auf schmalen Fenstern soll die Speichern-Leiste buendig bleiben. */
+@media (max-width: 1488px) {
+  .sticky-save {
+    margin-left: -24px;
+    margin-right: -24px;
+  }
+}
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13.5px;
+}
+th,
+td {
+  text-align: left;
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--border);
+  vertical-align: middle;
+}
+th {
+  color: var(--text-faint);
+  font-weight: 500;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+}
+tbody tr:last-child td {
+  border-bottom: none;
+}
+tbody tr:hover {
+  background: var(--bg-elevated);
+}
+td.nowrap {
+  white-space: nowrap;
+}
+td.dim {
+  color: var(--text-dim);
+}
+
+/* ---------- Serverauswahl ---------- */
+
+.guild-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 12px;
+}
+.guild-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px;
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  color: var(--text);
+  transition: border-color 0.12s, transform 0.12s;
+}
+.guild-card:hover {
+  border-color: var(--border-strong);
+  transform: translateY(-1px);
+  text-decoration: none;
+}
+.guild-icon {
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  background: var(--surface-2);
+  display: grid;
+  place-items: center;
+  font-weight: 600;
+  font-size: 17px;
+  flex-shrink: 0;
+  overflow: hidden;
+  color: var(--text-dim);
+}
+.guild-icon img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.guild-card .name {
+  font-weight: 500;
+  font-size: 14.5px;
+}
+.guild-card .role {
+  color: var(--text-faint);
+  font-size: 12.5px;
+}
+
+/* ---------- Meldungen ---------- */
+
+.notice {
+  max-width: 980px;
+  padding: 12px 15px;
+  border-radius: var(--radius-sm);
+  font-size: 13.5px;
+  margin-bottom: 16px;
+  border: 1px solid;
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  line-height: 1.5;
+}
+.notice svg {
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+.notice.error {
+  background: var(--danger-soft);
+  border-color: color-mix(in srgb, var(--danger) 40%, transparent);
+  color: #ffc4c6;
+}
+.notice.success {
+  background: var(--success-soft);
+  border-color: color-mix(in srgb, var(--success) 40%, transparent);
+  color: #a9e8cd;
+}
+.notice.warning {
+  background: var(--warning-soft);
+  border-color: color-mix(in srgb, var(--warning) 40%, transparent);
+  color: #f5d3a0;
+}
+.notice.info {
+  background: var(--bg-elevated);
+  border-color: var(--border);
+  color: var(--text-dim);
+}
+
+.empty {
+  color: var(--text-faint);
+  text-align: center;
+  padding: 38px 16px;
+  font-size: 13.5px;
+}
+.empty svg {
+  display: block;
+  margin: 0 auto 10px;
+  opacity: 0.4;
+}
+
+/* ---------- Hilfsklassen ---------- */
+
+.row {
+  display: flex;
+  gap: 12px;
+  align-items: flex-end;
+  flex-wrap: wrap;
+}
+.row > * {
+  flex: 1;
+  min-width: 150px;
+}
+.row > .shrink {
+  flex: 0 0 auto;
+  min-width: 0;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 2px 9px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 500;
+  background: var(--surface-2);
+  color: var(--text-dim);
+  white-space: nowrap;
+}
+.badge.warn {
+  background: var(--warning-soft);
+  color: var(--warning);
+}
+.badge.danger {
+  background: var(--danger-soft);
+  color: var(--danger);
+}
+.badge.ok {
+  background: var(--success-soft);
+  color: var(--success);
+}
+.badge.accent {
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+
+/* ---------- Nachrichtenvorschau ---------- */
+
+.preview {
+  background: #2b2d35;
+  border-radius: var(--radius-sm);
+  padding: 13px 15px;
+  font-size: 14px;
+  border: 1px solid var(--border);
+  display: flex;
+  gap: 11px;
+}
+.preview .avatar {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: var(--accent);
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  color: #fff;
+  font-weight: 600;
+  font-size: 13px;
+}
+.preview .author {
+  font-weight: 600;
+  font-size: 14px;
+  margin-bottom: 1px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.preview .bot-tag {
+  background: var(--accent);
+  color: #fff;
+  font-size: 10px;
+  padding: 0 4px;
+  border-radius: 3px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+.preview .mention {
+  color: #c9cdfb;
+  background: rgba(124, 92, 255, 0.28);
+  border-radius: 3px;
+  padding: 0 2px;
+}
+.preview .body {
+  min-width: 0;
+  word-break: break-word;
+}
+
+/* ---------- Eskalationsstufen ---------- */
+
+.escalation-step {
+  display: flex;
+  gap: 9px;
+  align-items: center;
+  margin-bottom: 8px;
+  flex-wrap: wrap;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 9px 11px;
+}
+.escalation-step .lbl {
+  color: var(--text-faint);
+  font-size: 12.5px;
+}
+.escalation-step input[type="number"] {
+  width: 68px;
+  flex: 0 0 auto;
+}
+.escalation-step select {
+  width: auto;
+  flex: 1;
+  min-width: 128px;
+}
+.escalation-step .step-num {
+  width: 22px;
+  height: 22px;
+  border-radius: 6px;
+  background: var(--accent-soft);
+  color: var(--accent);
+  display: grid;
+  place-items: center;
+  font-size: 11.5px;
+  font-weight: 600;
+  flex-shrink: 0;
+}
+
+/* ---------- Speichern-Leiste ---------- */
+
+.sticky-save {
+  position: sticky;
+  bottom: 0;
+  background: color-mix(in srgb, var(--bg-elevated) 92%, transparent);
+  backdrop-filter: blur(8px);
+  border-top: 1px solid var(--border);
+  padding: 13px 24px;
+  margin: 24px -24px -80px;
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  z-index: 10;
+}
+.sticky-save .hint {
+  color: var(--text-dim);
+  font-size: 13px;
+}
+
+/* ---------- Anmeldung ---------- */
+
+.login-wrap {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+}
+.login-card {
+  width: 100%;
+  max-width: 400px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 32px;
+  box-shadow: var(--shadow);
+  text-align: center;
+}
+.login-card .brand-mark {
+  width: 52px;
+  height: 52px;
+  border-radius: 14px;
+  margin: 0 auto 18px;
+}
+.login-card h1 {
+  font-size: 19px;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+.login-card p {
+  color: var(--text-dim);
+  font-size: 13.5px;
+  margin: 0 0 24px;
+  line-height: 1.55;
+}
+.login-card button {
+  width: 100%;
+  justify-content: center;
+  padding: 11px;
+}
+.login-foot {
+  margin-top: 20px;
+  color: var(--text-faint);
+  font-size: 12px;
+}
+
+@media (max-width: 640px) {
+  .container {
+    padding: 20px 14px 80px;
+  }
+  .card {
+    padding: 17px;
+  }
+  .table-wrap {
+    margin: 0 -17px -17px;
+    padding: 0 17px 4px;
+  }
+  .sticky-save {
+    margin: 20px -14px -80px;
+    padding: 12px 14px;
+  }
+}

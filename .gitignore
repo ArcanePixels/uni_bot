@@ -1,0 +1,29 @@
+# Zugangsdaten - niemals einchecken
+.env
+.env.local
+.env.*.local
+
+# Abhängigkeiten und Build-Ausgaben
+node_modules/
+.next/
+.next-*/
+.turbo/
+
+# Fertige Image-Archive (über 100 MB)
+dist/
+
+# Datenbank und Sicherungen
+data/
+backups/
+*.sqlite
+*.sqlite-shm
+*.sqlite-wal
+
+# Eigene Plugins der jeweiligen Installation - README und Beispiel bleiben
+plugins/*
+!plugins/README.md
+!plugins/*.js.txt
+
+# Betriebssystem
+.DS_Store
+Thumbs.db

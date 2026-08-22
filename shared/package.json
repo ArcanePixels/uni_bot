@@ -1,0 +1,17 @@
+{
+  "name": "@allrounder/shared",
+  "version": "1.0.0",
+  "type": "module",
+  "main": "src/index.js",
+  "exports": {
+    "./schema": "./src/schema.js",
+    "./db": "./src/db.js",
+    "./settings": "./src/settings.js",
+    ".": "./src/index.js",
+    "./settings-schema": "./src/settings-schema.js",
+    "./slash-commands": "./src/slash-commands.js"
+  },
+  "dependencies": {
+    "better-sqlite3": "^11.7.0"
+  }
+}

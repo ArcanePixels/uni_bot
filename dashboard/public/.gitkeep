@@ -1,0 +1,2 @@
+# Verzeichnis fuer statische Dateien (Bilder, Icons).
+# Muss existieren, sonst schlaegt der COPY-Schritt im Dockerfile fehl.

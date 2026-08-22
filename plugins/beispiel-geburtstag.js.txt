@@ -1,0 +1,106 @@
+/**
+ * BEISPIEL-PLUGIN — zum Abschauen gedacht.
+ *
+ * Um es zu benutzen: in `beispiel-geburtstag.js` umbenennen (also die Endung
+ * `.txt` entfernen) und den Bot neu starten. So wie es hier liegt, wird es
+ * bewusst nicht geladen.
+ *
+ * Was es tut: Mitglieder tragen mit `!geburtstag 24.12.` ihren Geburtstag ein,
+ * der Bot gratuliert am passenden Tag im eingestellten Kanal.
+ *
+ * Es zeigt die vier Dinge, die man meistens braucht:
+ *   1. Eine eigene Tabelle anlegen
+ *   2. Auf Nachrichten reagieren
+ *   3. Einen wiederkehrenden Ablauf (Timer) starten und sauber beenden
+ *   4. Einstellungen des Servers lesen
+ */
+
+export default {
+  name: 'geburtstage',
+
+  setup({ db, client, settings, audit }) {
+    // --- 1. Eigene Tabelle ---------------------------------------------------
+    // `IF NOT EXISTS` ist wichtig: setup läuft bei jedem Bot-Start.
+    db.exec(`
+      CREATE TABLE IF NOT EXISTS plugin_geburtstage (
+        guild_id TEXT NOT NULL,
+        user_id  TEXT NOT NULL,
+        tag      INTEGER NOT NULL,
+        monat    INTEGER NOT NULL,
+        PRIMARY KEY (guild_id, user_id)
+      )
+    `);
+
+    const merken = db.prepare(
+      `INSERT INTO plugin_geburtstage (guild_id, user_id, tag, monat) VALUES (?, ?, ?, ?)
+       ON CONFLICT(guild_id, user_id) DO UPDATE SET tag = excluded.tag, monat = excluded.monat`,
+    );
+    const heuteGeburtstag = db.prepare(
+      'SELECT guild_id, user_id FROM plugin_geburtstage WHERE tag = ? AND monat = ?',
+    );
+
+    // Damit an einem Tag nur einmal gratuliert wird, auch wenn der Timer
+    // mehrfach läuft.
+    let zuletztGratuliert = null;
+
+    // --- 3. Wiederkehrender Ablauf ------------------------------------------
+    // Stündlich prüfen. Der Timer wird in teardown() wieder abgeräumt.
+    this._timer = setInterval(() => gratulieren().catch(() => {}), 3600_000);
+    this._timer.unref?.();
+
+    async function gratulieren() {
+      const jetzt = new Date();
+      const stempel = `${jetzt.getFullYear()}-${jetzt.getMonth()}-${jetzt.getDate()}`;
+      if (zuletztGratuliert === stempel) return;
+      zuletztGratuliert = stempel;
+
+      for (const eintrag of heuteGeburtstag.all(jetzt.getDate(), jetzt.getMonth() + 1)) {
+        // --- 4. Einstellungen lesen ---
+        // Eigene Abschnitte tauchen hier auf, sobald sie in
+        // shared/src/settings.js und settings-schema.js stehen.
+        const cfg = settings.get(eintrag.guild_id).welcome;
+        if (!cfg?.channelId) continue;
+
+        const kanal = await client.channels.fetch(cfg.channelId).catch(() => null);
+        await kanal
+          ?.send(`🎂 Alles Gute zum Geburtstag, <@${eintrag.user_id}>!`)
+          .catch(() => {});
+
+        audit.record({
+          guildId: eintrag.guild_id,
+          actorId: 'geburtstage',
+          action: 'plugin.geburtstag',
+          target: eintrag.user_id,
+        });
+      }
+    }
+
+    // --- 2. Auf Nachrichten reagieren ---------------------------------------
+    return {
+      async messageCreate(message) {
+        if (!message.guild || message.author.bot) return;
+
+        const treffer = message.content.match(/^!geburtstag\s+(\d{1,2})\.(\d{1,2})\.?$/);
+        if (!treffer) return;
+
+        const tag = Number(treffer[1]);
+        const monat = Number(treffer[2]);
+        // Eingaben immer prüfen - sonst landet Unsinn in der Datenbank.
+        if (tag < 1 || tag > 31 || monat < 1 || monat > 12) {
+          await message.reply('Das sieht nach keinem gültigen Datum aus. Beispiel: `!geburtstag 24.12.`');
+          return;
+        }
+
+        merken.run(message.guild.id, message.author.id, tag, monat);
+        await message.reply(`Gemerkt: ${tag}.${monat}. 🎂`);
+      },
+
+      // Beim Start einmal prüfen, damit nicht bis zur vollen Stunde gewartet wird.
+      ready: () => gratulieren().catch(() => {}),
+    };
+  },
+
+  teardown() {
+    clearInterval(this._timer);
+  },
+};

@@ -1,0 +1,16 @@
+**/node_modules
+**/npm-debug.log
+
+# Build-Ausgaben und Zwischenspeicher.
+# Wichtig: .next enthaelt Turbopacks Zwischenspeicher, der plattformspezifisch
+# ist. Wandert er aus einer Windows-Umgebung in den Linux-Container, bricht der
+# Build mit "Restore failures / Invalid block type" ab.
+**/.next
+**/.next-*
+**/.turbo
+dist/
+
+data/
+.env
+.env.local
+.git/
