@@ -78,9 +78,10 @@ eine dauerhafte Verbindung.
 
 ```
 shared/     DB-Schema, Settings-Store, Feldbeschreibung der Oberfläche
-bot/        Der Bot selbst, Plugins unter src/plugins/
+bot/        Der Bot selbst, mitgelieferte Funktionen unter src/plugins/
 api/        REST-API
 dashboard/  Weboberfläche (Next.js) mit Discord-Login
+plugins/    Eigene Erweiterungen - hier kommen deine Plugins rein
 docs/       Anleitungen
 ```
 
@@ -90,21 +91,48 @@ jeder Änderung doppelt gepflegt werden.
 
 ### Plugin-System
 
-**Erweiterbar ohne Eingriff in den Bot-Code:** Datei nach `plugins/` legen, Bot
-neu starten. Ein defektes Plugin wird übersprungen und im Log gemeldet — der Bot
-startet trotzdem. Zwei Beispiele zum Abschauen: [`plugins/regeln/`](plugins/regeln) — das
-Serverregeln-Plugin mit eigener Dashboard-Seite, beschrieben in
-[docs/regeln-plugin.md](docs/regeln-plugin.md) — und
-[`plugins/beispiel-geburtstag.js.txt`](plugins/beispiel-geburtstag.js.txt)
-(schlicht, nur Bot-Teil).
+**Erweiterbar ohne Eingriff in den Bot-Code und ohne Neubau.** Ein Plugin ist ein
+Ordner unter `plugins/`:
 
-Ein Plugin ist ein Objekt mit `name` und `setup(ctx)`. `setup` bekommt
-`{ client, db, settings, infractions, audit }` und gibt Event-Handler zurück:
+```
+plugins/mein-plugin/
+  plugin.json    Pflicht: Name, Reiter, Oberfläche
+  bot.js         optional: was der Bot tun soll
+  api.js         optional: eigene Endpunkte
+```
+
+Hineinlegen, `docker compose restart`, fertig. Ein defektes Plugin wird
+übersprungen und im Log gemeldet — der Bot startet trotzdem.
+
+Die `plugin.json` beschreibt die Oberfläche als Daten. Daraus entstehen Tabellen,
+Endpunkte, Eingabeprüfung und der Reiter im Dashboard von selbst:
+
+```json
+{
+  "name": "mein-plugin",
+  "label": "Mein Plugin",
+  "ui": {
+    "sections": [
+      {
+        "type": "form",
+        "fields": [{ "key": "channel_id", "label": "Kanal", "type": "channel" }]
+      }
+    ]
+  }
+}
+```
+
+Der Umweg über eine Beschreibung statt React-Code ist nötig, weil Next.js seine
+Seiten beim Bauen kompiliert — im fertigen Container steckt kein Compiler mehr.
+Käme die Oberfläche als Code, müsste jeder Nutzer das Dashboard neu bauen.
+
+Soll das Plugin auch in Discord etwas tun, kommt `bot.js` dazu — ein Objekt mit
+`name` und `setup(ctx)`, das Event-Handler zurückgibt:
 
 ```js
 export default {
   name: 'mein-plugin',
-  setup({ settings }) {
+  setup({ client, store, log }) {
     return {
       async messageCreate(message) { /* … */ },
     };
@@ -112,12 +140,21 @@ export default {
 };
 ```
 
-Registriert wird es in `bot/src/index.js` im Array `PLUGINS`. Wirft ein Plugin
-beim Behandeln eines Events, wird das geloggt und die übrigen laufen weiter —
-ein defektes Modul legt den Bot nicht lahm.
+`ctx` enthält `client`, `store` (der Datenspeicher zu deiner `plugin.json`),
+`manifest`, `log` sowie `db`, `settings`, `infractions` und `audit`. Wirft ein
+Handler, wird das geloggt und die übrigen Plugins laufen weiter — ein defektes
+Modul legt den Bot nicht lahm.
 
-Wie ein neues Plugin entsteht — inklusive Dashboard-Oberfläche ohne
-Frontend-Arbeit — steht in [docs/plugin-entwickeln.md](docs/plugin-entwickeln.md).
+Zwei Beispiele zum Abschauen: [`plugins/regeln/`](plugins/regeln) — das
+Serverregeln-Plugin mit eigener Dashboard-Seite, beschrieben in
+[docs/regeln-plugin.md](docs/regeln-plugin.md) — und
+[`plugins/beispiel-geburtstag.js.txt`](plugins/beispiel-geburtstag.js.txt)
+(schlicht, nur Bot-Teil im älteren Einzeldatei-Format).
+
+Alle Bausteine und Feldtypen stehen in
+[docs/plugin-entwickeln.md](docs/plugin-entwickeln.md). Fest **mitgelieferte**
+Funktionen liegen dagegen unter `bot/src/plugins/` und werden in
+`bot/src/index.js` eingetragen — dafür ist ein Neubau nötig.
 
 ### Farbe je Server
 
@@ -140,9 +177,13 @@ welche Abschnitte es gibt, welche Felder, welchen Typ sie haben, wovon sie
 abhängen. Das Dashboard baut seine Formulare daraus, statt für jedes Feld
 eigenes JSX zu haben.
 
-Ein neues Plugin trägt dort einen Abschnitt ein und bekommt seine Oberfläche
-geschenkt — Formular, Speichern, Ein-/Ausblendlogik inklusive. Am
-Dashboard-Code ändert sich dabei nichts.
+Dasselbe Prinzip trägt das Plugin-System: Dort beschreibt die `plugin.json` die
+Oberfläche, hier `settings-schema.js`. In beiden Fällen bekommt man Formular,
+Speichern und Prüfung geschenkt, ohne Dashboard-Code zu schreiben.
+
+Der Unterschied: `settings-schema.js` gehört zum Grundsystem und wird beim Bauen
+einkompiliert — Änderungen daran brauchen einen Neubau. Eine `plugin.json` wird
+zur Laufzeit gelesen und braucht keinen.
 
 ## Aktualisieren
 
@@ -188,6 +229,10 @@ Cloudflare Tunnel, nicht über einen offenen Port am Router.
 - Das API-Token verlässt nie den Server — der Browser sieht es nicht.
 - Refresh-Token-Flow für abgelaufene Discord-Sitzungen; schlägt er fehl, führt
   der Weg zum erneuten Login statt zu einem Serverfehler.
+- **Plugins laufen mit den vollen Rechten des Bots.** Wer eine Datei nach
+  `plugins/` legt, kann bannen, Kanäle löschen, Nachrichten mitlesen und auf die
+  Daten aller Server zugreifen. Es gibt keine technische Schranke dagegen — lade
+  nur Plugins aus Quellen, denen du vertraust, und sieh vorher in den Code.
 
 ## Stand
 
@@ -209,9 +254,14 @@ sind alle Punkte aus dem ursprünglichen Konzept umgesetzt.
 **Stufe 6** (Alltag): Slash-Commands, eigene Textbefehle, Nachrichten-Log,
 automatische Sicherung.
 
-180 Tests grün, 0 npm-Audit-Funde. Alle drei Images gebaut und im Container
-geprüft: alle Seiten leiten ohne Login auf `/login` um, alle elf Bot-Plugins
-laden, die automatische Sicherung läuft nachweislich (im Test mit
+**Stufe 7** (Plugins): Erweiterungen bringen ihre eigene Dashboard-Seite mit,
+beschrieben in einer `plugin.json` — Ordner hineinlegen, neu starten, fertig.
+Serverregeln sind das erste Plugin im neuen Format.
+
+338 Tests grün, 0 npm-Audit-Funde. Alle drei Images gebaut und im Container
+geprüft: alle Seiten leiten ohne Login auf `/login` um, alle elf mitgelieferten
+Bot-Funktionen laden, ein Plugin-Ordner wird ohne Neubau erkannt und im
+Dashboard angezeigt, die automatische Sicherung läuft nachweislich (im Test mit
 Minuten-Zeitplan beobachtet).
 
 ### Discord-Anfragen
@@ -220,6 +270,11 @@ Discord drosselt Bots, die zu oft fragen. Die API speichert deshalb zwischen:
 Serverdaten 10 Minuten, Kanäle und Rollen 5, Mitgliederlisten 2. Parallele
 Aufrufe derselben Daten werden zusammengefasst, statt mehrfach zu fragen, und
 bei kurzen Sperren wartet die API selbstständig ab.
+
+Eine Ausnahme: Die Rechteprüfung für Plugin-Kanäle hält nur 10 Sekunden. Wer in
+Discord ein Recht setzt und im Dashboard nachsieht, ob es gewirkt hat, soll nicht
+minutenlang den alten Stand sehen. Vertretbar, weil diese Abfrage nur auf einer
+Plugin-Seite läuft — nicht im Layout und nicht bei jeder Aktion.
 
 Wirkung: Fünf Seitenaufrufe im Dashboard kosten 3 Discord-Anfragen statt 15.
 Moderationsaktionen verwerfen gezielt nur die Mitgliederliste – ein Kick ändert
@@ -238,6 +293,7 @@ inklusive Bits jenseits von `Number.MAX_SAFE_INTEGER`.
 - Leveling/XP mit Rangkarten
 - Cross-Posting (News einmal schreiben, in mehreren Kanälen posten)
 - Cloudflare Tunnel einrichten (braucht eine Domain)
+- Sicherungen außer Haus (liegen derzeit im selben Volume wie die Datenbank)
 
 ## Lizenz
 

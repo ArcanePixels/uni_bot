@@ -10,7 +10,7 @@
     "dashboard"
   ],
   "scripts": {
-    "test": "node --test \"bot/test/*.test.js\" \"api/test/*.test.js\" \"dashboard/test/*.test.js\"",
+    "test": "node --test \"shared/test/*.test.js\" \"bot/test/*.test.js\" \"api/test/*.test.js\" \"dashboard/test/*.test.js\"",
     "start:bot": "node bot/src/index.js",
     "start:api": "node api/src/index.js"
   },

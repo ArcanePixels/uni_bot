@@ -16,5 +16,8 @@
   },
   "dependencies": {
     "better-sqlite3": "^11.7.0"
+  },
+  "scripts": {
+    "test": "node --test \"test/*.test.js\""
   }
 }
