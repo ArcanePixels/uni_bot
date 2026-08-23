@@ -161,6 +161,37 @@ export async function triggerBackup(guildId) {
   return guarded(guildId, (session) => api.createBackup(session.user.id));
 }
 
+// --- Serverregeln (Plugin plugins/regeln.js) --------------------------------
+
+// --- Plugins ---------------------------------------------------------------
+// Auch hier: eine Handvoll Actions fuer beliebig viele Plugins. Der
+// Plugin-Name kommt als Parameter, deshalb kommt bei einem neuen Plugin
+// nichts dazu.
+
+export async function savePluginConfig(guildId, plugin, cfg) {
+  return guarded(guildId, () => api.savePluginConfig(guildId, plugin, cfg));
+}
+
+export async function addPluginItem(guildId, plugin, list, werte) {
+  return guarded(guildId, () => api.addPluginItem(guildId, plugin, list, werte));
+}
+
+export async function updatePluginItem(guildId, plugin, list, id, werte) {
+  return guarded(guildId, () => api.updatePluginItem(guildId, plugin, list, id, werte));
+}
+
+export async function deletePluginItem(guildId, plugin, list, id) {
+  return guarded(guildId, () => api.deletePluginItem(guildId, plugin, list, id));
+}
+
+export async function movePluginItem(guildId, plugin, list, id, direction) {
+  return guarded(guildId, () => api.movePluginItem(guildId, plugin, list, id, direction));
+}
+
+export async function runPluginAction(guildId, plugin, action) {
+  return guarded(guildId, () => api.runPluginAction(guildId, plugin, action));
+}
+
 // --- Setup-Wizard und Rechte ------------------------------------------------
 
 export async function createInterest(guildId, payload) {

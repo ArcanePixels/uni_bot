@@ -882,3 +882,141 @@ td.dim {
     padding: 12px 14px;
   }
 }
+
+/* --- Plugin-Seiten ------------------------------------------------------- */
+/* Die Bausteine, aus denen sich eine Plugin-Oberflaeche zusammensetzt. Sie
+   sind fest eingebaut, weil Next.js seine Seiten beim Bauen kompiliert - ein
+   Plugin liefert nur die Beschreibung, welche Bausteine es haben will. */
+
+/* Mehrere Felder nebeneinander, sobald Platz da ist. */
+.field-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 0 18px;
+  max-width: 100%;
+}
+.field-grid .field {
+  max-width: none;
+}
+
+.color-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+.color-row input[type='color'] {
+  width: 44px;
+  height: 38px;
+  padding: 2px;
+  flex: 0 0 auto;
+  cursor: pointer;
+}
+.color-row input[type='text'] {
+  flex: 1 1 auto;
+  font-family: var(--mono, ui-monospace, monospace);
+}
+
+.plugin-list {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 20px;
+}
+.plugin-list > li {
+  border-top: 1px solid var(--border);
+  padding: 12px 0;
+}
+.plugin-list > li:first-child {
+  border-top: none;
+}
+
+.plugin-list-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+.plugin-list-row .pos {
+  color: var(--text-faint);
+  font-variant-numeric: tabular-nums;
+  padding-top: 2px;
+  flex: 0 0 auto;
+}
+.plugin-list-row .grow {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+.plugin-list-row .grow .help {
+  margin-top: 4px;
+  /* Lange Regeltexte sollen die Zeile nicht sprengen. */
+  overflow-wrap: anywhere;
+}
+.plugin-list-row .actions {
+  display: flex;
+  gap: 6px;
+  flex: 0 0 auto;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.plugin-list-edit {
+  padding: 4px 0;
+}
+
+.plugin-add {
+  border-top: 1px solid var(--border);
+  padding-top: 18px;
+}
+.plugin-add h3 {
+  font-size: 14px;
+  font-weight: 600;
+  margin: 0 0 14px;
+}
+
+.action-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.action-item .help {
+  margin: 0;
+}
+
+.saved-hint {
+  color: var(--ok, #3ba55d);
+  font-size: 13px;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+.error-hint {
+  color: var(--danger, #ed4245);
+  font-size: 13px;
+}
+
+@media (max-width: 640px) {
+  /* Auf dem Handy sonst zu gedraengt. */
+  .plugin-list-row {
+    flex-wrap: wrap;
+  }
+  .plugin-list-row .actions {
+    width: 100%;
+    justify-content: flex-start;
+  }
+}
+
+/* Feld plus Statusanzeige darunter (etwa die Rechte-Pruefung). */
+.field-wrap {
+  margin-bottom: 18px;
+}
+.field-wrap .field {
+  margin-bottom: 8px;
+}
+.field-wrap .notice {
+  margin: 8px 0 0;
+}
+.field-wrap .notice .help {
+  margin: 6px 0 0;
+}
+.field-wrap .saved-hint {
+  display: inline-flex;
+  margin-top: 2px;
+}

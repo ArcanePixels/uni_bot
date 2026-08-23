@@ -17,11 +17,18 @@ export class PluginHost {
     this.#ctx = ctx;
   }
 
-  async register(plugin) {
+  /**
+   * Nimmt ein Plugin in Betrieb.
+   *
+   * `extra` ergaenzt den gemeinsamen Kontext um Plugin-Eigenes - etwa den
+   * eigenen Datenspeicher und ein Log mit dem Plugin-Namen davor.
+   */
+  async register(plugin, extra = null) {
     if (!plugin?.name || typeof plugin.setup !== 'function') {
       throw new Error('Plugin braucht name und setup()');
     }
-    const handlers = (await plugin.setup(this.#ctx)) ?? {};
+    const ctx = extra ? { ...this.#ctx, ...extra } : this.#ctx;
+    const handlers = (await plugin.setup(ctx)) ?? {};
     this.#plugins.push({ plugin, handlers });
     log.info(`Plugin geladen: ${plugin.name}`);
   }

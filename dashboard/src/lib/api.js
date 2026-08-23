@@ -132,6 +132,41 @@ export const api = {
   clearMessageLog: (guildId, params = '') =>
     request(g(guildId, `/messagelog${params}`), { method: 'DELETE' }),
 
+  // --- Plugins ------------------------------------------------------------
+  // Eine Handvoll Endpunkte fuer beliebig viele Erweiterungen. Der Pfad
+  // enthaelt den Plugin-Namen, deshalb kommt hier bei einem neuen Plugin
+  // nichts dazu.
+  getPlugins: () => request('/api/guilds/plugins'),
+  getPluginData: (guildId, plugin) => request(g(guildId, `/p/${encodeURIComponent(plugin)}`)),
+  savePluginConfig: (guildId, plugin, cfg) =>
+    request(g(guildId, `/p/${encodeURIComponent(plugin)}/config`), {
+      method: 'PUT',
+      body: JSON.stringify(cfg),
+    }),
+  addPluginItem: (guildId, plugin, list, werte) =>
+    request(g(guildId, `/p/${encodeURIComponent(plugin)}/list/${encodeURIComponent(list)}`), {
+      method: 'POST',
+      body: JSON.stringify(werte),
+    }),
+  updatePluginItem: (guildId, plugin, list, id, werte) =>
+    request(g(guildId, `/p/${encodeURIComponent(plugin)}/list/${encodeURIComponent(list)}/${id}`), {
+      method: 'PUT',
+      body: JSON.stringify(werte),
+    }),
+  deletePluginItem: (guildId, plugin, list, id) =>
+    request(g(guildId, `/p/${encodeURIComponent(plugin)}/list/${encodeURIComponent(list)}/${id}`), {
+      method: 'DELETE',
+    }),
+  movePluginItem: (guildId, plugin, list, id, direction) =>
+    request(
+      g(guildId, `/p/${encodeURIComponent(plugin)}/list/${encodeURIComponent(list)}/${id}/move`),
+      { method: 'POST', body: JSON.stringify({ direction }) },
+    ),
+  runPluginAction: (guildId, plugin, action) =>
+    request(g(guildId, `/p/${encodeURIComponent(plugin)}/action/${encodeURIComponent(action)}`), {
+      method: 'POST',
+    }),
+
   getBackups: (actorId) =>
     request(`/api/system/backups?actorId=${encodeURIComponent(actorId ?? '')}`),
   createBackup: (actorId) =>

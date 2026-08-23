@@ -11,8 +11,23 @@ import { featureRoutes } from './routes/features.js';
 import { wizardRoutes } from './routes/wizard.js';
 import { backupRoutes } from './routes/backup.js';
 import { commandRoutes } from './routes/commands.js';
+import { pluginRoutes } from './routes/plugins.js';
 
-export function createApp(db, apiToken, botToken = null, backupConfig = null) {
+/**
+ * Baut die API.
+ *
+ * `plugins` sind die von `discoverPlugins` gefundenen Ordner, `pluginRouters`
+ * die von deren optionalen `api.js` gelieferten Zusatz-Router. Beides ist
+ * optional - ohne Plugins laeuft alles wie zuvor.
+ */
+export function createApp(
+  db,
+  apiToken,
+  botToken = null,
+  backupConfig = null,
+  plugins = [],
+  pluginRouters = new Map(),
+) {
   const app = express();
   app.use(express.json({ limit: '256kb' }));
 
@@ -40,6 +55,12 @@ export function createApp(db, apiToken, botToken = null, backupConfig = null) {
   guilds.use(featureRoutes(db, botToken));
   guilds.use(wizardRoutes(db, botToken));
   guilds.use(commandRoutes(db));
+
+  // Plugins: eine Route fuer beliebig viele Erweiterungen. Steht bewusst am
+  // Ende, damit ein Plugin keinen Endpunkt des Grundsystems verdecken kann.
+  const { router: pluginRouter } = pluginRoutes(db, plugins, pluginRouters, botToken);
+  guilds.use(pluginRouter);
+
   app.use('/api/guilds', guilds);
 
   app.use((_req, res) => res.status(404).json({ error: 'Unbekannter Endpunkt' }));

@@ -1,11 +1,11 @@
 'use client';
 
 import { usePathname } from 'next/navigation';
-import { List, Shield, Clock, Play, Gavel, Users, Plus, Wave } from './Icons.js';
+import { List, Shield, Clock, Play, Gavel, Users, Plus, Wave, Plug, ICON_MAP } from './Icons.js';
 
 /**
- * Die Reiter. Ein neuer Bereich kommt hier als ein Eintrag dazu - passend zum
- * Plugin-Gedanken des Bots.
+ * Die festen Reiter des Grundsystems. Plugins kommen als `plugins` dazu -
+ * die stehen nicht hier, weil sie erst zur Laufzeit bekannt sind.
  */
 const TABS = [
   { slug: '', label: 'Übersicht', icon: List },
@@ -21,17 +21,29 @@ const TABS = [
   { slug: 'audit', label: 'Audit-Log', icon: List },
 ];
 
-export function GuildTabs({ guildId }) {
+export function GuildTabs({ guildId, plugins = [] }) {
   const pathname = usePathname();
   const base = `/guild/${guildId}`;
 
+  // Plugin-Reiter kommen hinter denen des Grundsystems, in der Reihenfolge, in
+  // der die Ordner gefunden wurden.
+  const alle = [
+    ...TABS.map((t) => ({ ...t, href: t.slug ? `${base}/${t.slug}` : base })),
+    ...plugins.map((p) => ({
+      slug: `p/${p.name}`,
+      label: p.label,
+      // Das Plugin darf sich ein Symbol aus dem Bestand aussuchen.
+      icon: ICON_MAP[p.icon] ?? Plug,
+      href: `${base}/p/${p.name}`,
+    })),
+  ];
+
   return (
     <nav className="tabs">
-      {TABS.map((t) => {
-        const href = t.slug ? `${base}/${t.slug}` : base;
+      {alle.map((t) => {
         const Icon = t.icon;
         return (
-          <a key={t.slug} href={href} className={pathname === href ? 'active' : ''}>
+          <a key={t.slug} href={t.href} className={pathname === t.href ? 'active' : ''}>
             <Icon width={15} height={15} />
             {t.label}
           </a>

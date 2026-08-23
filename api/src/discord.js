@@ -14,6 +14,11 @@ const CACHE_MS = {
   channels: 5 * 60_000,
   roles: 5 * 60_000,
   members: 2 * 60_000, // am teuersten: laedt in 1000er-Bloecken
+  // Rechte werden geprueft, waehrend jemand sie gerade in Discord aendert und
+  // im Dashboard nachsieht, ob es gewirkt hat. Ein langer Cache zeigt dann
+  // minutenlang den alten Stand - und man dreht an Rechten, die laengst passen.
+  // 10 Sekunden reichen, damit ein Seitenaufbau nicht mehrfach anfragt.
+  perms: 10_000,
 };
 const DEFAULT_CACHE_MS = 5 * 60_000;
 
@@ -322,3 +327,45 @@ export const __test__ = {
     inFlight.clear();
   },
 };
+
+/**
+ * Der Bot selbst als Mitglied dieses Servers - vor allem seine Rollen.
+ *
+ * Braucht das Dashboard, um anzuzeigen, ob der Bot in einem Kanal posten darf.
+ */
+export async function getBotMember(guildId, botToken) {
+  return cached(`perms:botmember:${guildId}`, async () => {
+    // Erst die eigene User-ID. `/guilds/{id}/members/@me` gibt es nur fuer
+    // OAuth2-Tokens eines Nutzers - mit einem Bot-Token antwortet Discord mit
+    // 400. Deshalb der Umweg ueber /users/@me und die konkrete Mitglieds-ID.
+    const self = await call('/users/@me', botToken);
+    const m = await call(`/guilds/${guildId}/members/${self.id}`, botToken);
+    return { id: self.id, roleIds: m.roles ?? [] };
+  });
+}
+
+/**
+ * Kanaele mit ihren Rechte-Ueberschreibungen.
+ *
+ * `getGuildChannels` laesst die bewusst weg, weil sie im Dashboard nur Ballast
+ * waeren. Fuer die Rechtepruefung braucht es sie aber.
+ */
+export async function getChannelsWithOverwrites(guildId, botToken) {
+  return cached(`perms:channels:${guildId}`, async () => {
+    const all = await call(`/guilds/${guildId}/channels`, botToken);
+    return all.map((c) => ({
+      id: c.id,
+      name: c.name,
+      type: c.type,
+      permission_overwrites: c.permission_overwrites ?? [],
+    }));
+  });
+}
+
+/** Alle Rollen mit ihren Rechte-Bits - inklusive @everyone und Bot-Rollen. */
+export async function getRawRoles(guildId, botToken) {
+  return cached(`perms:roles:${guildId}`, async () => {
+    const all = await call(`/guilds/${guildId}/roles`, botToken);
+    return all.map((r) => ({ id: r.id, name: r.name, permissions: r.permissions ?? '0' }));
+  });
+}

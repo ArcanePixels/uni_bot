@@ -32,6 +32,7 @@ eine dauerhafte Verbindung.
 [Befehle & Sicherung](docs/befehle-und-sicherung.md) ·
 [Was gespeichert wird](docs/datenschutz.md) ·
 [Eigene Plugins](docs/plugin-entwickeln.md) ·
+[Serverregeln](docs/regeln-plugin.md) ·
 [Aktualisieren](docs/aktualisieren.md)
 
 ## Was er kann
@@ -43,6 +44,10 @@ eine dauerhafte Verbindung.
 - **YouTube-Upload-Check** — neue Videos per RSS erkennen und posten
   (Discord kann das nativ nicht; Twitch dagegen schon — dafür also kein eigenes Modul)
 - **Audit-Log** — wer hat wann was ausgelöst
+- **Serverregeln** — im Dashboard zusammenstellen, der Bot postet sie als Embed
+  und hält sie aktuell (mitgeliefertes Plugin, siehe `plugins/regeln/`)
+- **Plugin-System** — eigene Erweiterungen bekommen ihre Dashboard-Seite aus
+  einer `plugin.json`. Ordner hineinlegen, neu starten, fertig — ohne Neubau
 - **Dashboard** — alles davon im Browser einstellen, mit Discord-Login und
   Dropdowns für Kanäle und Rollen statt abgetippter IDs
 - **Reaction Roles** — Mitglieder vergeben sich Rollen per Emoji-Klick,
@@ -87,8 +92,11 @@ jeder Änderung doppelt gepflegt werden.
 
 **Erweiterbar ohne Eingriff in den Bot-Code:** Datei nach `plugins/` legen, Bot
 neu starten. Ein defektes Plugin wird übersprungen und im Log gemeldet — der Bot
-startet trotzdem. Ein vollständiges Beispiel liegt unter
-[`plugins/beispiel-geburtstag.js.txt`](plugins/beispiel-geburtstag.js.txt).
+startet trotzdem. Zwei Beispiele zum Abschauen: [`plugins/regeln/`](plugins/regeln) — das
+Serverregeln-Plugin mit eigener Dashboard-Seite, beschrieben in
+[docs/regeln-plugin.md](docs/regeln-plugin.md) — und
+[`plugins/beispiel-geburtstag.js.txt`](plugins/beispiel-geburtstag.js.txt)
+(schlicht, nur Bot-Teil).
 
 Ein Plugin ist ein Objekt mit `name` und `setup(ctx)`. `setup` bekommt
 `{ client, db, settings, infractions, audit }` und gibt Event-Handler zurück:

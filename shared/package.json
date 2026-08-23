@@ -1,6 +1,6 @@
 {
   "name": "@allrounder/shared",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "type": "module",
   "main": "src/index.js",
   "exports": {
@@ -9,7 +9,10 @@
     "./settings": "./src/settings.js",
     ".": "./src/index.js",
     "./settings-schema": "./src/settings-schema.js",
-    "./slash-commands": "./src/slash-commands.js"
+    "./slash-commands": "./src/slash-commands.js",
+    "./plugin-manifest": "./src/plugin-manifest.js",
+    "./plugin-discovery": "./src/plugin-discovery.js",
+    "./plugin-store": "./src/plugin-store.js"
   },
   "dependencies": {
     "better-sqlite3": "^11.7.0"

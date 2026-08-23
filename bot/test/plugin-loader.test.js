@@ -131,6 +131,31 @@ test('Ein Ordner ohne index.js wird übergangen, nicht gemeldet', async () => {
   assert.deepEqual(res.fehler, [], 'ein Ordner ohne index.js ist kein harter Fehler');
 });
 
+test('Ein Ordner mit plugin.json gehoert dem neuen Lader', async () => {
+  // Die beiden Lader teilen sich denselben Ordner. Griffe dieser hier nach
+  // einem Manifest-Plugin, wuerde er es als kaputt melden - und der Bot laedt
+  // es dann nicht, obwohl die API es kennt. Genau das war einmal der Fall:
+  // Reiter im Dashboard sichtbar, aber der Bot tat nichts.
+  mkdirSync(join(dir, 'regeln'));
+  writeFileSync(
+    join(dir, 'regeln', 'plugin.json'),
+    JSON.stringify({ name: 'regeln', label: 'Regeln' }),
+    'utf8',
+  );
+  writeFileSync(join(dir, 'regeln', 'bot.js'), GUELTIG, 'utf8');
+
+  const res = await loadExternalPlugins(dir);
+  assert.deepEqual(res.geladen, [], 'nicht dieser Lader');
+  assert.deepEqual(res.fehler, [], 'und schon gar keine Fehlermeldung');
+});
+
+test('Ein Ordner ohne beides wird weiterhin gemeldet', async () => {
+  mkdirSync(join(dir, 'kaputt'));
+  writeFileSync(join(dir, 'kaputt', 'irgendwas.js'), GUELTIG, 'utf8');
+  const res = await loadExternalPlugins(dir);
+  assert.deepEqual(res.geladen, []);
+});
+
 test('validatePlugin benennt das Problem konkret', () => {
   assert.match(validatePlugin({}, 'x.js'), /Standard-Export/);
   assert.match(validatePlugin({ default: {} }, 'x.js'), /name/);

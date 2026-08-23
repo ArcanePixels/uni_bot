@@ -1,3 +1,4 @@
+import { pathToFileURL } from 'node:url';
 import { Client, GatewayIntentBits, Partials } from 'discord.js';
 import { openDatabase } from '@allrounder/shared';
 import { loadConfig } from './config.js';
@@ -7,6 +8,8 @@ import { InfractionService } from './core/infractions.js';
 import { AuditService } from './core/audit.js';
 import { PluginHost } from './core/plugin-host.js';
 import { loadExternalPlugins } from './core/plugin-loader.js';
+import { discoverPlugins } from '@allrounder/shared/plugin-discovery';
+import { createPluginStore } from '@allrounder/shared/plugin-store';
 
 import automod from './plugins/automod.js';
 import welcome from './plugins/welcome.js';
@@ -110,7 +113,9 @@ for (const plugin of PLUGINS) await host.register(plugin);
 
 // Eigene Plugins aus dem Erweiterungsverzeichnis. Fehlt das Verzeichnis,
 // passiert schlicht nichts.
-const pluginDir = process.env.PLUGIN_DIR?.trim() || '/plugins';
+// Innerhalb von /app, damit Node die Pakete des Bots findet - es sucht
+// node_modules nur oberhalb des Modulpfads.
+const pluginDir = process.env.PLUGIN_DIR?.trim() || '/app/plugins';
 const { geladen, fehler } = await loadExternalPlugins(
   pluginDir,
   PLUGINS.map((p) => p.name),
@@ -123,12 +128,42 @@ for (const plugin of geladen) {
     fehler.push(`${plugin.name}: ${err.message}`);
   }
 }
+
+// Ordner-Plugins: eigener Aufbau mit plugin.json. Die bekommen ihren
+// Datenspeicher vom Grundsystem gestellt - passend zu den Feldern, die im
+// Manifest stehen. Deshalb braucht so ein Plugin keine eigenen Tabellen mehr.
+const { plugins: ordnerPlugins, fehler: ordnerFehler } = discoverPlugins(pluginDir);
+fehler.push(...ordnerFehler);
+let ordnerAktiv = 0;
+for (const p of ordnerPlugins) {
+  if (!p.botPath) continue; // Ein Plugin darf auch reine Oberflaeche sein.
+  try {
+    const mod = await import(pathToFileURL(p.botPath).href);
+    const plugin = mod.default;
+    if (!plugin?.name || typeof plugin.setup !== 'function') {
+      fehler.push(`${p.name}/bot.js: kein gueltiges Plugin (name und setup(ctx) noetig)`);
+      continue;
+    }
+    if (host.names.includes(plugin.name)) {
+      fehler.push(`${p.name}: der Name "${plugin.name}" ist bereits vergeben`);
+      continue;
+    }
+    await host.register(plugin, {
+      store: createPluginStore(db, p.manifest),
+      manifest: p.manifest,
+      log: createLogger(`plugin:${p.name}`),
+    });
+    ordnerAktiv++;
+  } catch (err) {
+    fehler.push(`${p.name}: ${err.message}`);
+  }
+}
 if (fehler.length) {
   log.error(`${fehler.length} Plugin(s) konnten nicht geladen werden:`);
   for (const f of fehler) log.error(`  - ${f}`);
 }
-if (geladen.length) {
-  log.info(`${geladen.length} externe(s) Plugin(s) aktiv`);
+if (geladen.length || ordnerAktiv) {
+  log.info(`${geladen.length + ordnerAktiv} externe(s) Plugin(s) aktiv`);
 }
 
 try {

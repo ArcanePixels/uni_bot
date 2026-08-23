@@ -138,9 +138,43 @@ test('Abgelaufene Einträge werden neu geholt', async () => {
   assert.equal(calls, 2);
 });
 
-test('Alle bekannten Arten haben eine Dauer über einer Minute', () => {
+/**
+ * Arten, die bewusst kurz zwischengespeichert werden - mit Begruendung.
+ *
+ * Jede Ausnahme hier muss verdient sein: Zu kurze Dauern waren die Ursache der
+ * Drosselung durch Discord.
+ */
+const KURZ_ERLAUBT = {
+  // Rechte werden geprueft, waehrend jemand sie gerade in Discord aendert und
+  // im Dashboard nachsieht, ob es gewirkt hat. Bei fuenf Minuten sieht er
+  // minutenlang den alten Stand und dreht an Rechten, die laengst passen -
+  // genau das ist passiert. Vertretbar, weil die Abfragen nur auf der
+  // Plugin-Seite laufen, nicht im Layout und nicht bei jeder Aktion.
+  perms: 10_000,
+};
+
+test('Alle Arten haben eine Dauer über einer Minute', () => {
   // Zu kurze Dauern waren die Ursache der Drosselung.
   for (const [kind, ms] of Object.entries(CACHE_MS)) {
+    if (kind in KURZ_ERLAUBT) continue;
     assert.ok(ms >= 60_000, `${kind} ist mit ${ms}ms zu kurz`);
+  }
+});
+
+test('Die kurzen Ausnahmen sind genau die dokumentierten', () => {
+  // Damit niemand versehentlich eine weitere Art kurz setzt, ohne sie oben
+  // zu begruenden.
+  const kurz = Object.entries(CACHE_MS)
+    .filter(([, ms]) => ms < 60_000)
+    .map(([kind]) => kind)
+    .sort();
+  assert.deepEqual(kurz, Object.keys(KURZ_ERLAUBT).sort());
+});
+
+test('Auch die Ausnahmen bleiben ueber einer Sekunde', () => {
+  // Sonst waere der Zwischenspeicher wirkungslos und ein Seitenaufbau
+  // loeste mehrere Anfragen aus.
+  for (const [kind, ms] of Object.entries(KURZ_ERLAUBT)) {
+    assert.ok(CACHE_MS[kind] >= 5_000, `${kind} ist mit ${CACHE_MS[kind]}ms zu kurz`);
   }
 });

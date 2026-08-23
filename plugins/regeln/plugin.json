@@ -1,0 +1,107 @@
+{
+  "name": "regeln",
+  "label": "Regeln",
+  "icon": "scroll",
+  "description": "Serverregeln zusammenstellen - der Bot postet sie als Nachricht und haelt sie aktuell.",
+  "version": "1.0.0",
+  "ui": {
+    "sections": [
+      {
+        "type": "list",
+        "key": "items",
+        "title": "Die Regeln",
+        "description": "Ein Satz je Regel reicht - die Nummerierung vergibt der Bot. Eine Ueberschrift brauchst du nur, wenn du eine Regel ausfuehrlicher erklaeren willst. Mit den Pfeilen sortierst du.",
+        "max": 25,
+        "itemLabel": "text",
+        "fields": [
+          {
+            "key": "icon",
+            "label": "Symbol",
+            "type": "emoji",
+            "placeholder": "z. B. 🤝 (optional)",
+            "maxLength": 16
+          },
+          {
+            "key": "text",
+            "label": "Regel",
+            "type": "textarea",
+            "maxLength": 500,
+            "placeholder": "Seien Sie cool, freundlich und respektvoll zueinander.",
+            "required": true
+          },
+          {
+            "key": "title",
+            "label": "Überschrift (optional)",
+            "type": "text",
+            "maxLength": 200,
+            "placeholder": "nur bei ausführlichen Regeln nötig",
+            "help": "Leer lassen für eine schlichte Aufzählung wie im Beispiel."
+          }
+        ]
+      },
+      {
+        "type": "form",
+        "title": "Darstellung",
+        "description": "Wo und wie die Regeln in Discord erscheinen.",
+        "fields": [
+          {
+            "key": "channel_id",
+            "label": "Kanal",
+            "type": "channel",
+            "help": "In welchen Kanal die Regeln gepostet werden. Der Bot braucht dort vier Rechte - die Prüfung darunter sagt dir, ob sie gesetzt sind.",
+            "requiresPermissions": [
+              "VIEW_CHANNEL",
+              "SEND_MESSAGES",
+              "EMBED_LINKS",
+              "READ_MESSAGE_HISTORY"
+            ]
+          },
+          {
+            "key": "title",
+            "label": "Ueberschrift",
+            "type": "text",
+            "default": "Serverregeln",
+            "maxLength": 256
+          },
+          {
+            "key": "description",
+            "label": "Einleitung",
+            "type": "textarea",
+            "maxLength": 2000,
+            "placeholder": "Optional, steht ueber den Regeln."
+          },
+          {
+            "key": "color",
+            "label": "Farbe",
+            "type": "color",
+            "default": "#5865f2"
+          },
+          {
+            "key": "footer",
+            "label": "Fusszeile",
+            "type": "text",
+            "maxLength": 2048,
+            "placeholder": "Optional, etwa der Servername."
+          }
+        ]
+      },
+      {
+        "type": "actions",
+        "actions": [
+          {
+            "key": "publish",
+            "label": "Erneut posten",
+            "style": "secondary",
+            "requires": [
+              "channel_id"
+            ],
+            "requiresList": "items",
+            "help": "Holt die Nachricht zurück, wenn sie in Discord gelöscht wurde."
+          }
+        ],
+        "title": "Veröffentlichen",
+        "description": "Der Bot postet von selbst, sobald du etwas änderst – Regel anlegen, ändern, löschen oder sortieren. Er bearbeitet dabei die bestehende Nachricht, statt eine neue zu posten. Du musst hier nichts drücken."
+      }
+    ]
+  }
+}

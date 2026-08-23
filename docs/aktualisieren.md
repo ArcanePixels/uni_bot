@@ -17,6 +17,37 @@ Dashboard → Befehle → Sicherungen → *Jetzt sichern*.
 
 ---
 
+## Wenn du die Dateien von Hand kopierst
+
+Ohne `git pull` — also per WinSCP, Samba-Freigabe oder USB — gibt es einen
+Stolperstein: **Kopieren überschreibt und ergänzt, aber es löscht nichts.**
+Dateien, die in der neuen Version entfernt wurden, bleiben liegen. Der Build
+bricht dann ab, weil eine alte Seite etwas importiert, das es nicht mehr gibt:
+
+```
+Error: Export createRule doesn't exist in target module
+```
+
+Deshalb **nach dem Kopieren, vor dem Bauen**:
+
+```bash
+sh aufraeumen.sh
+```
+
+Das zeigt, was übrig geblieben ist. Zum Entfernen:
+
+```bash
+sh aufraeumen.sh --loeschen
+```
+
+Danach normal bauen. Das Skript räumt außerdem den Build-Zwischenspeicher
+(`dashboard/.next`) weg — der ist plattformabhängig und lässt den Build sonst
+mit „Restore failures" abbrechen, wenn er von einem Windows-Rechner mitkam.
+
+> Mit `git pull` brauchst du das nicht: git entfernt gelöschte Dateien selbst.
+
+---
+
 ## Was dabei passiert
 
 | | |

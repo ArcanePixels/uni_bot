@@ -117,6 +117,14 @@ Sicherungen verwalten. Ausführlich in
 
 **Audit-Log** — die letzten 100 Ereignisse, mit Namen statt IDs.
 
+**Regeln** — Serverregeln zusammenstellen, der Bot postet sie als Nachricht und
+hält sie aktuell. Ausführlich in [regeln-plugin.md](regeln-plugin.md).
+
+Hinter „Regeln" steckt kein fest eingebauter Reiter, sondern ein **Plugin**:
+Alles, was du dort siehst, beschreibt die Datei `plugins/regeln/plugin.json`.
+Eigene Plugins bekommen auf demselben Weg ihren Reiter — ohne dass etwas neu
+gebaut werden muss. Siehe [plugin-entwickeln.md](plugin-entwickeln.md).
+
 ---
 
 ## Farbe

@@ -3,6 +3,7 @@ import { requireGuildAccess, AccessError } from '@/lib/guard.js';
 import { api } from '@/lib/api.js';
 import { TopBar } from '@/components/TopBar.js';
 import { GuildTabs } from '@/components/GuildTabs.js';
+import { getPluginList } from '@/lib/plugin-cache.js';
 import { AccentStyle } from '@/components/AccentStyle.js';
 import { Alert } from '@/components/Icons.js';
 
@@ -31,6 +32,10 @@ export default async function GuildLayout({ children, params }) {
     );
   }
 
+  // Die Reiter der Plugins. Zwischengespeichert, weil das Layout bei jedem
+  // Aufruf laeuft.
+  const plugins = await getPluginList();
+
   // Akzentfarbe aus dem Server-Icon. Faellt das aus, bleibt die Markenfarbe -
   // deshalb bewusst ohne Fehlerbehandlung nach aussen.
   let accent = null;
@@ -49,7 +54,7 @@ export default async function GuildLayout({ children, params }) {
       <AccentStyle color={accent} />
       <TopBar user={session.user} guildName={guild.name} guildIcon={iconUrl} />
       <div className="container">
-        <GuildTabs guildId={guildId} />
+        <GuildTabs guildId={guildId} plugins={plugins} />
         {children}
       </div>
     </>

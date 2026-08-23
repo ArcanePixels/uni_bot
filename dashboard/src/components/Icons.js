@@ -110,4 +110,44 @@ export const Logo = (p) => (
   </svg>
 );
 
-export const ICON_MAP = { shield: Shield, wave: Wave, clock: Clock, play: Play };
+/** Stecker - der Standard fuer Plugins ohne eigenes Symbol. */
+export const Plug = (p) => (
+  <svg {...base} {...p}>
+    <path d="M9 2v6M15 2v6" />
+    <path d="M6 8h12v3a6 6 0 0 1-6 6 6 6 0 0 1-6-6V8z" />
+    <path d="M12 17v5" />
+  </svg>
+);
+
+export const Scroll = (p) => (
+  <svg {...base} {...p}>
+    <path d="M8 3h9a2 2 0 0 1 2 2v13a3 3 0 0 1-3 3H7" />
+    <path d="M5 3a2 2 0 0 0-2 2v2h5V5a2 2 0 0 0-2-2z" />
+    <path d="M16 21a3 3 0 0 1-3-3v-2h8v2a3 3 0 0 1-3 3" />
+  </svg>
+);
+
+export const Trash = (p) => (
+  <svg {...base} {...p}>
+    <path d="M3 6h18M8 6V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2" />
+    <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" />
+  </svg>
+);
+
+/**
+ * Symbole, die ein Plugin in seinem Manifest per Namen waehlen kann.
+ * Was hier nicht steht, bekommt den Stecker.
+ */
+export const ICON_MAP = {
+  shield: Shield,
+  wave: Wave,
+  clock: Clock,
+  play: Play,
+  list: List,
+  users: Users,
+  gavel: Gavel,
+  plus: Plus,
+  hash: Hash,
+  scroll: Scroll,
+  plug: Plug,
+};

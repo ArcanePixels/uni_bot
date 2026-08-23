@@ -112,6 +112,14 @@ kennt keine echte Verwarnfunktion.
 
 ---
 
+## Serverregeln
+
+Serverregeln sind kein Teil dieser Seite, sondern ein eigenes Plugin — samt
+eigenem Reiter im Dashboard. Beschrieben in
+[regeln-plugin.md](regeln-plugin.md).
+
+---
+
 ## Wenn etwas nicht klappt
 
 **Klick auf ein Emoji bewirkt nichts**

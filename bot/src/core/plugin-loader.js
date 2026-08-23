@@ -27,10 +27,16 @@ function candidates(dir) {
 
     const full = join(dir, name);
     if (statSync(full).isDirectory()) {
-      // Ordner-Plugin: index.js darin.
+      // Ordner mit plugin.json gehoeren dem neuen Lader (siehe
+      // shared/plugin-discovery.js) - der bringt ihnen ihren Datenspeicher
+      // und die Dashboard-Seite mit. Hier stillschweigend uebergehen, sonst
+      // wuerde dieser Lader sie faelschlich als kaputt melden.
+      if (existsSync(join(full, 'plugin.json'))) continue;
+
+      // Ordner-Plugin im aelteren Format: index.js darin.
       const entry = join(full, 'index.js');
       if (existsSync(entry)) out.push({ name, path: entry });
-      else log.warn(`Ordner "${name}" enthaelt keine index.js - uebersprungen`);
+      else log.warn(`Ordner "${name}" enthaelt weder plugin.json noch index.js - uebersprungen`);
       continue;
     }
     if (name.endsWith('.js') || name.endsWith('.mjs')) out.push({ name, path: full });

@@ -1,7 +1,9 @@
 import { Cron } from 'croner';
 import { openDatabase } from '@allrounder/shared';
+import { pathToFileURL } from 'node:url';
 import { createApp } from './app.js';
 import { createBackup } from './backup.js';
+import { discoverPlugins, DEFAULT_PLUGIN_DIR } from '@allrounder/shared/plugin-discovery';
 
 const databasePath = process.env.DATABASE_PATH?.trim() || '/data/bot.sqlite';
 const port = Number(process.env.API_PORT ?? 8080);
@@ -46,9 +48,42 @@ if (ownerIds.length === 0) {
 
 // Beide Prozesse legen das Schema selbst an - so ist es egal, wer zuerst startet.
 const db = openDatabase(databasePath);
-const server = createApp(db, token, botToken, backupConfig).listen(port, () => {
-  console.log(`[api] Lauscht auf Port ${port}`);
-});
+
+// --- Plugins ---------------------------------------------------------------
+// Ordner einlesen, Manifeste pruefen. Die Tabellen entstehen spaeter in
+// createApp. Ein kaputtes Plugin wird gemeldet und uebersprungen, damit die
+// API in jedem Fall startet.
+const pluginDir = process.env.PLUGIN_DIR?.trim() || DEFAULT_PLUGIN_DIR;
+const { plugins, fehler: pluginFehler } = discoverPlugins(pluginDir);
+for (const f of pluginFehler) console.warn(`[api] Plugin uebersprungen - ${f}`);
+
+// Optionale eigene Endpunkte eines Plugins.
+const pluginRouters = new Map();
+for (const p of plugins) {
+  if (!p.apiPath) continue;
+  try {
+    const mod = await import(pathToFileURL(p.apiPath).href);
+    const bauen = mod.default ?? mod.routes;
+    if (typeof bauen !== 'function') {
+      console.warn(`[api] ${p.name}/api.js exportiert keine Funktion - uebersprungen`);
+      continue;
+    }
+    const router = bauen({ db, botToken, manifest: p.manifest });
+    if (router) pluginRouters.set(p.name, router);
+  } catch (err) {
+    console.error(`[api] ${p.name}/api.js konnte nicht geladen werden: ${err.message}`);
+  }
+}
+if (plugins.length) {
+  console.log(`[api] ${plugins.length} Plugin(s): ${plugins.map((p) => p.name).join(', ')}`);
+}
+
+const server = createApp(db, token, botToken, backupConfig, plugins, pluginRouters).listen(
+  port,
+  () => {
+    console.log(`[api] Lauscht auf Port ${port}`);
+  },
+);
 
 // Automatische Sicherung. Laeuft im API-Prozess, weil der ohnehin schon
 // lesenden Zugriff auf die Datenbank hat.

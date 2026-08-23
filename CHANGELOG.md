@@ -5,7 +5,56 @@ Versionierung nach [Semantic Versioning](https://semver.org/lang/de/).
 
 Wie man aktualisiert, steht in [docs/aktualisieren.md](docs/aktualisieren.md).
 
-## [Unveröffentlicht]
+## [1.1.0] – 2026-08-23
+
+### Hinzugefügt
+
+- **Plugin-System: Erweiterungen ohne Neubau.** Ein Plugin ist ein Ordner unter
+  `plugins/` mit einer `plugin.json`, die seine Oberfläche beschreibt — Formulare,
+  sortierbare Listen und Aktionsknöpfe. Tabellen, Endpunkte, Prüfung der Eingaben
+  und der Reiter im Dashboard entstehen daraus von selbst. Ordner hineinlegen,
+  `docker compose restart`, fertig. Beschrieben in
+  [docs/plugin-entwickeln.md](docs/plugin-entwickeln.md).
+- **Serverregeln** als mitgeliefertes Plugin: im Dashboard zusammenstellen, der
+  Bot postet sie als Nachricht und hält sie aktuell. Ohne Überschriften wird
+  daraus eine schlichte nummerierte Liste, mit Überschriften bekommt jede Regel
+  ihren eigenen Block. Symbole, freie Sortierung, Farbe und Einleitung wählbar.
+  Moderatoren zeigen sie mit `!regeln` in jedem Kanal an.
+  Siehe [docs/regeln-plugin.md](docs/regeln-plugin.md).
+- **Rechteprüfung im Dashboard.** Unter der Kanal-Auswahl steht, ob der Bot dort
+  posten darf — und wenn nicht, welches Recht fehlt und wo man es setzt. Plugins
+  geben ihren Bedarf über `requiresPermissions` an. Vorher merkte man ein
+  fehlendes Recht erst daran, dass nichts passierte.
+- **Rückmeldung des Bots.** Was beim letzten Durchlauf herauskam, steht im
+  Dashboard: „gepostet (10 Regeln)" oder eben, woran es scheiterte.
+- YouTube-Feeds lassen sich auf Knopfdruck sofort prüfen; die Oberfläche nennt
+  außerdem, wann automatisch geprüft wird.
+- `aufraeumen.sh` findet Dateien, die es in der neuen Version nicht mehr gibt —
+  nötig für alle, die per Kopie aktualisieren statt per `git pull`.
+
+### Geändert
+
+- Die Reiter im Dashboard entstehen jetzt teils zur Laufzeit: die des
+  Grundsystems fest, die der Plugins aus deren `plugin.json`.
+- Der Plugin-Ordner liegt unter `/app/plugins` statt `/plugins`. Node sucht
+  `node_modules` nur oberhalb des Modulpfads — aus einem Ordner außerhalb konnte
+  ein Plugin `discord.js` nicht importieren.
+- Discord-Daten für die Rechteprüfung werden nur 10 Sekunden zwischengespeichert
+  statt fünf Minuten. Wer ein Recht in Discord setzt, sieht die Wirkung sofort
+  statt minutenlang den alten Stand.
+
+### Wichtig beim Aktualisieren
+
+- Die `docker-compose.yml` hat sich geändert: Der Plugin-Ordner wird jetzt auch
+  in den API-Container eingebunden. **Ohne das bleibt der Plugin-Reiter leer.**
+  Beim Aktualisieren also mit übertragen.
+- Wer die Dateien **von Hand kopiert** statt `git pull` zu nutzen: Kopieren
+  überschreibt und ergänzt, löscht aber nichts. Reste älterer Versionen lassen
+  den Dashboard-Build scheitern. Vor dem Bauen einmal:
+
+  ```bash
+  sh aufraeumen.sh --loeschen
+  ```
 
 ## [1.0.0] – 2026-08-22
 

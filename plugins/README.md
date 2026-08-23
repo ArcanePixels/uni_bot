@@ -1,27 +1,43 @@
 # Eigene Plugins
 
-Lege hier `.js`-Dateien ab und starte den Bot neu:
+Hier liegen Erweiterungen für den Bot. Ein Plugin ist ein Ordner:
 
-```bash
-docker compose restart bot
+```
+plugins/
+  mein-plugin/
+    plugin.json    ← Pflicht: Name, Reiter, Oberfläche
+    bot.js         ← optional: was der Bot tun soll
+    api.js         ← optional: eigene Endpunkte
 ```
 
-Der Bot meldet im Log, was er geladen hat — und warum etwas nicht geklappt hat:
+Ordner hineinlegen, neu starten, fertig — **ohne die Images neu zu bauen**:
 
 ```bash
-docker compose logs bot --tail 30
+docker compose restart
 ```
 
-**Wie man ein Plugin schreibt:** [docs/plugin-entwickeln.md](../docs/plugin-entwickeln.md)
+Was geladen wurde und warum etwas nicht, steht im Log:
 
----
+```bash
+docker compose logs api --tail 30 | grep -i plugin
+```
 
-## Sicherheitshinweis
+Ein Plugin mit Fehler wird übersprungen; der Bot startet trotzdem.
+Ein `_` vor dem Ordnernamen schaltet ein Plugin vorübergehend ab.
 
-Ein Plugin läuft mit **den vollen Rechten des Bots**. Es kann Mitglieder
-bannen, Kanäle löschen, Nachrichten mitlesen und auf die Datenbank zugreifen —
-inklusive der Daten aller Server.
+## Was hier liegt
 
-Lade deshalb nur Plugins aus Quellen, denen du vertraust, und sieh in den Code,
-bevor du ihn ablegst. Es gibt keine technische Schranke, die ein bösartiges
-Plugin aufhalten würde.
+- **`regeln/`** — Serverregeln zusammenstellen und als Nachricht posten.
+  Mitgeliefert und zugleich die Vorlage für eigene Plugins.
+- **`beispiel-geburtstag.js.txt`** — ein reines Bot-Plugin im älteren
+  Einzeldatei-Format. Zum Ausprobieren die Endung `.txt` entfernen.
+
+## Anleitung
+
+[docs/plugin-entwickeln.md](../docs/plugin-entwickeln.md) beschreibt alle
+Bausteine, Feldtypen und Schnittstellen.
+
+> **Ein Plugin läuft mit den vollen Rechten des Bots.** Es kann bannen, Kanäle
+> löschen, Nachrichten mitlesen und auf die Daten aller Server zugreifen. Es
+> gibt keine technische Schranke dagegen — lade nur Plugins aus Quellen, denen
+> du vertraust, und sieh vorher in den Code.
