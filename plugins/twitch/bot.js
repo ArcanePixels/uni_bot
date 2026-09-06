@@ -286,10 +286,25 @@ export default {
       try {
         const nutzer = await twitch.getUsers([...alle]);
         const bestehend = await twitch.listSubscriptions();
+        const eigene = bestehend.filter(
+          (b) => b.type === 'stream.online' && b.callback === webhookUrl,
+        );
+
+        // Gescheiterte Anmeldungen zaehlen nicht als vorhanden - sonst wuerde
+        // der Bot sie nie erneuern. Sie muessen aber weg, bevor er es neu
+        // versucht, sonst sammeln sie sich an.
+        const gescheitert = eigene.filter((b) => b.status?.includes('failed'));
+        if (gescheitert.length) {
+          log?.warn(
+            `${gescheitert.length} Twitch-Anmeldung(en) gescheitert: Twitch erreicht ` +
+              `${webhookUrl} nicht. Leitet der Reverse Proxy /twitch/webhook an die API ` +
+              `(Port 8080) weiter? Siehe docs/twitch-plugin.md.`,
+          );
+          for (const b of gescheitert) await twitch.unsubscribe(b.id).catch(() => {});
+        }
+
         const angemeldet = new Set(
-          bestehend
-            .filter((b) => b.type === 'stream.online' && b.callback === webhookUrl)
-            .map((b) => String(b.userId)),
+          eigene.filter((b) => !b.status?.includes('failed')).map((b) => String(b.userId)),
         );
 
         let neu = 0;
@@ -307,8 +322,8 @@ export default {
         // Was nicht mehr beobachtet wird, wieder abmelden - sonst sammeln
         // sich Anmeldungen an, die niemand mehr braucht.
         const gebraucht = new Set([...nutzer.values()].map((u) => String(u.id)));
-        for (const b of bestehend) {
-          if (b.type !== 'stream.online' || b.callback !== webhookUrl) continue;
+        for (const b of eigene) {
+          if (gescheitert.includes(b)) continue; // schon oben entfernt
           if (gebraucht.has(String(b.userId))) continue;
           await twitch.unsubscribe(b.id);
         }

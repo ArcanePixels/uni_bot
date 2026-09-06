@@ -72,6 +72,24 @@ erfordert, dass **Twitch deinen Server erreichen kann**:
 > **Eine IP-Adresse genügt nicht.** Twitch nimmt ausschließlich `https://` an,
 > und ein Zertifikat gibt es nur für einen Domainnamen.
 
+> **Wichtig beim Reverse Proxy:** Der Webhook gehört zur **API** (Port 8080),
+> nicht zum Dashboard (Port 3000). Wer nur das Dashboard weiterleitet, bekommt
+> bei `/twitch/webhook` eine 404 — und Twitch meldet die Anmeldung als
+> `webhook_callback_verification_failed`.
+>
+> Für Caddy sieht das so aus:
+>
+> ```
+> bot.deine-domain.de {
+> 	handle /twitch/webhook* {
+> 		reverse_proxy localhost:8080
+> 	}
+> 	handle {
+> 		reverse_proxy localhost:3000
+> 	}
+> }
+> ```
+
 Dann in die `.env`:
 
 ```
@@ -166,7 +184,23 @@ Ein `GET` auf dieselbe Adresse ergibt immer `404` — das ist normal und sagt
 nichts darüber aus, ob der Webhook läuft.
 
 Kommt bis hierher alles richtig, aber Twitch meldet sich trotzdem nicht, prüf
-die Anmeldung im Log:
+den **Zustand der Anmeldungen bei Twitch**:
+
+```bash
+docker compose exec bot node -e "import('@allrounder/shared/twitch').then(async m=>{const c=m.createTwitchClient({clientId:process.env.TWITCH_CLIENT_ID,clientSecret:process.env.TWITCH_CLIENT_SECRET});for(const s of await c.listSubscriptions())console.log(s.type,'|',s.status,'|',s.userId)})"
+```
+
+| Status | Bedeutung |
+|---|---|
+| `enabled` | Alles richtig, Twitch meldet sich beim Livegehen. |
+| `webhook_callback_verification_failed` | Twitch hat den Endpunkt nicht erreicht. Meist leitet der Proxy `/twitch/webhook` nicht an die API weiter (siehe oben). |
+| `webhook_callback_verification_pending` | Die Prüfung läuft noch – ein paar Sekunden warten. |
+
+Steht dort mehrfach derselbe Kanal mit `..._failed`, ist das kein zweiter
+Fehler: Fehlgeschlagene Anmeldungen zählen nicht als vorhanden, deshalb
+versucht es der Bot stündlich erneut. Nach dem Beheben räumt er von selbst auf.
+
+Auch das Log hilft:
 
 ```bash
 docker compose logs bot | grep -i "angemeldet\|Anmeldung"

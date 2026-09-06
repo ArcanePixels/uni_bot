@@ -297,3 +297,40 @@ test('Eine bereits entfernte Anmeldung ist kein Fehler', async () => {
   const client = createTwitchClient({ clientId: 'id', clientSecret: 'geheim', fetchImpl: f });
   assert.deepEqual(await client.unsubscribe('weg'), { ok: true });
 });
+
+test('Der Zustand einer Anmeldung wird mitgeliefert', async () => {
+  // Ohne den Status waere nicht erkennbar, dass Twitch den Endpunkt gar nicht
+  // erreicht hat - die Anmeldung sieht sonst aus wie jede andere.
+  const f = fakeFetch([
+    TOKEN_OK,
+    {
+      match: 'eventsub',
+      body: {
+        data: [
+          {
+            id: 's1',
+            type: 'stream.online',
+            status: 'enabled',
+            condition: { broadcaster_user_id: '1' },
+            transport: { callback: 'https://x/y' },
+          },
+          {
+            id: 's2',
+            type: 'stream.online',
+            status: 'webhook_callback_verification_failed',
+            condition: { broadcaster_user_id: '2' },
+            transport: { callback: 'https://x/y' },
+          },
+        ],
+      },
+    },
+  ]);
+  const client = createTwitchClient({ clientId: 'id', clientSecret: 'geheim', fetchImpl: f });
+
+  const subs = await client.listSubscriptions();
+  assert.equal(subs.length, 2);
+  assert.equal(subs[0].status, 'enabled');
+  assert.match(subs[1].status, /failed/, 'der Fehlschlag muss erkennbar sein');
+  assert.equal(subs[1].callback, 'https://x/y');
+});
+
