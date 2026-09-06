@@ -29,6 +29,14 @@ Wie man aktualisiert, steht in [docs/aktualisieren.md](docs/aktualisieren.md).
 
 ### Hinzugefügt
 
+- **Startseite für alle, die den Bot noch nicht kennen.** Wer die Adresse ohne
+  Anmeldung aufruft, landet nicht mehr auf einer Login-Karte mit einem Satz,
+  sondern auf einer Übersicht: Funktionsumfang, Unterschiede zu den bekannten
+  Diensten, Anmelde-Knopf oben rechts. Erreichbar unter `/willkommen`.
+
+  Was dort steht, ist an den Quelltext gebunden: Jeder genannte Punkt verweist
+  auf die Datei, in der die Funktion steckt, und ein Test prüft, dass es sie
+  gibt.
 - **Daten eines Servers löschen.** Unter Einstellungen ganz unten lässt sich
   alles entfernen, was zu einem Server gespeichert ist — inklusive Plugin-Daten.
   Zum Bestätigen muss die Server-ID abgetippt werden; ein Klick allein löscht

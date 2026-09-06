@@ -28,7 +28,10 @@ export default async function LoginPage() {
             Mit Discord anmelden
           </button>
         </form>
-        <div className="login-foot">ein Werkzeug von ArcanePixels</div>
+        <div className="login-foot">
+          <a href="/willkommen">Was der Bot kann</a>
+          <span> · ein Werkzeug von ArcanePixels</span>
+        </div>
       </div>
     </div>
   );

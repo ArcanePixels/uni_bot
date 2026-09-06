@@ -52,7 +52,8 @@ eine dauerhafte Verbindung.
 - **Plugin-System** — eigene Erweiterungen bekommen ihre Dashboard-Seite aus
   einer `plugin.json`. Ordner hineinlegen, neu starten, fertig — ohne Neubau
 - **Dashboard** — alles davon im Browser einstellen, mit Discord-Login und
-  Dropdowns für Kanäle und Rollen statt abgetippter IDs
+  Dropdowns für Kanäle und Rollen statt abgetippter IDs. Eine Startseite unter
+  `/willkommen` erklärt den Umfang, bevor sich jemand anmeldet
 - **Reaction Roles** — Mitglieder vergeben sich Rollen per Emoji-Klick,
   wahlweise mehrere oder genau eine
 - **Ticket-System** — privater Kanal je Support-Anfrage, nur für Ersteller

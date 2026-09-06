@@ -7,7 +7,9 @@ import { Alert, Users } from '@/components/Icons.js';
 
 export default async function HomePage() {
   const session = await auth();
-  if (!session?.user || session.error === 'RefreshFailed') redirect('/login');
+  // Wer nicht angemeldet ist, sieht zuerst, worum es ueberhaupt geht -
+  // frueher landete man direkt auf einer Login-Karte mit einem Satz.
+  if (!session?.user || session.error === 'RefreshFailed') redirect('/willkommen');
 
   let guilds = null;
   let error = null;

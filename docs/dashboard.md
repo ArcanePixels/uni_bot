@@ -73,6 +73,23 @@ Dann im Browser `http://DEINE-SERVER-IP:3000` aufrufen.
 
 ---
 
+## Die Startseite
+
+Wer die Adresse ohne Anmeldung aufruft, landet auf einer Übersicht: was der Bot
+kann, worin er sich von den bekannten Diensten unterscheidet, und ein
+Anmelde-Knopf oben rechts.
+
+Diese Adresse kannst du weitergeben, wenn jemand den Bot nutzen soll — sie
+erklärt sich selbst.
+
+Angemeldete Nutzer sehen sie nicht; sie landen direkt bei ihren Servern. Über
+`/willkommen` ist sie jederzeit erreichbar.
+
+> Was dort steht, kommt aus `dashboard/src/lib/vorteile.js`. Jeder Punkt nennt
+> die Datei, in der die Funktion steckt, und ein Test prüft, dass es sie
+> wirklich gibt — eine Seite, die etwas verspricht, das nie gebaut wurde,
+> kostet Vertrauen.
+
 ## Wenn der Bot noch nicht auf dem Server ist
 
 Öffnest du einen Server, auf dem der Bot fehlt, steht dort statt der

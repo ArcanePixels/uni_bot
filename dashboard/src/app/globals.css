@@ -868,6 +868,12 @@ td.dim {
   justify-content: center;
   padding: 11px;
 }
+.login-foot a {
+  color: var(--text-dim);
+}
+.login-foot a:hover {
+  color: var(--text);
+}
 .login-foot {
   margin-top: 20px;
   color: var(--text-faint);
@@ -1203,4 +1209,161 @@ td.dim {
 }
 .loeschen-bestaetigung input {
   margin-bottom: 12px;
+}
+
+/* --- Startseite für Neue -------------------------------------------------- */
+/* Steht bewusst für sich: keine Reiterleiste, kein Dashboard-Rahmen. Wer
+   hier landet, kennt den Bot noch nicht. */
+
+.willkommen {
+  max-width: 980px;
+  margin: 0 auto;
+  padding: 0 20px 64px;
+}
+
+.wk-kopf {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 20px 0 40px;
+  flex-wrap: wrap;
+}
+.wk-kopf .brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 600;
+  font-size: 15px;
+}
+/* Der Anmeldeknopf oben ist bewusst kleiner als der im Einstieg - er soll
+   erreichbar sein, aber nicht mit ihm konkurrieren. */
+.wk-kopf button.klein {
+  padding: 7px 14px;
+  font-size: 13.5px;
+}
+
+.wk-einstieg {
+  padding: 20px 0 56px;
+  max-width: 720px;
+}
+.wk-einstieg h1 {
+  font-size: 40px;
+  line-height: 1.15;
+  margin: 0 0 20px;
+  letter-spacing: -0.02em;
+}
+.wk-einstieg .hervor {
+  color: var(--accent);
+}
+.wk-lead {
+  font-size: 17px;
+  line-height: 1.6;
+  color: var(--text-dim);
+  margin: 0 0 28px;
+}
+.wk-aktion {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+.wk-aktion .help {
+  max-width: 320px;
+  margin: 0;
+}
+
+.wk-unterschiede {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 16px;
+  margin-bottom: 64px;
+}
+.wk-karte {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 18px;
+}
+.wk-karte h3 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14.5px;
+  margin: 0 0 8px;
+}
+.wk-karte h3 svg {
+  color: var(--success);
+  flex-shrink: 0;
+}
+.wk-karte p {
+  margin: 0;
+  font-size: 13.5px;
+  line-height: 1.6;
+  color: var(--text-dim);
+}
+
+.wk-funktionen h2,
+.wk-abschluss h2 {
+  font-size: 24px;
+  margin: 0 0 24px;
+}
+.wk-raster {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 28px 32px;
+  margin-bottom: 64px;
+}
+.wk-gruppe h3 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 15px;
+  margin: 0 0 12px;
+  color: var(--accent);
+}
+.wk-gruppe ul {
+  margin: 0;
+  padding-left: 18px;
+  line-height: 1.8;
+  font-size: 13.5px;
+  color: var(--text-dim);
+}
+
+.wk-abschluss {
+  border-top: 1px solid var(--border);
+  padding-top: 40px;
+}
+.wk-abschluss p {
+  max-width: 620px;
+  line-height: 1.6;
+  color: var(--text-dim);
+  margin: 0 0 20px;
+}
+
+.wk-fuss {
+  margin-top: 56px;
+  padding-top: 20px;
+  border-top: 1px solid var(--border);
+  font-size: 12.5px;
+  color: var(--text-faint);
+}
+
+@media (max-width: 640px) {
+  /* Auf dem Handy ist die grosse Überschrift sonst zu wuchtig. */
+  .wk-einstieg h1 {
+    font-size: 29px;
+  }
+  .wk-lead {
+    font-size: 15.5px;
+  }
+  .wk-kopf {
+    padding-bottom: 24px;
+  }
+  .wk-einstieg {
+    padding-bottom: 40px;
+  }
+  .wk-aktion .help {
+    max-width: none;
+  }
 }
