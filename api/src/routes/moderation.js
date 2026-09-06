@@ -1,6 +1,10 @@
 import { Router } from 'express';
 import { now } from '@allrounder/shared';
+import { reichereMitgliederAn, darfAktion } from '../member-guard.js';
 import {
+  getGuild,
+  getGuildRoles,
+  getBotMember,
   getGuildMembers,
   resolveMembers,
   timeoutMember,
@@ -47,17 +51,48 @@ export function moderationRoutes(db, botToken) {
   router.get('/:guildId/members', async (req, res, next) => {
     if (requireToken(res)) return;
     try {
-      const members = await getGuildMembers(req.params.guildId, botToken);
+      const { guildId } = req.params;
+      // Rollen und Gruender mitholen: Ohne sie wuerde die Oberflaeche
+      // Massnahmen anbieten, die Discord ohnehin ablehnt - oder schlimmer,
+      // gegen einen selbst.
+      const [members, roles, guild, botMember] = await Promise.all([
+        getGuildMembers(guildId, botToken),
+        getGuildRoles(guildId, botToken),
+        getGuild(guildId, botToken),
+        getBotMember(guildId, botToken).catch(() => ({ id: null, roleIds: [] })),
+      ]);
+
+      const angereichert = reichereMitgliederAn({
+        members,
+        roles,
+        ownerId: guild.ownerId,
+        botRoleIds: botMember.roleIds,
+        actorId: req.query.actorId ? String(req.query.actorId) : null,
+      });
+
       const q = String(req.query.q ?? '').toLowerCase().trim();
-      const filtered = q
-        ? members.filter(
-            (m) =>
-              m.name.toLowerCase().includes(q) ||
-              (m.username ?? '').toLowerCase().includes(q) ||
-              m.id.includes(q),
-          )
-        : members;
-      res.json(filtered.slice(0, Number(req.query.limit ?? 200)));
+      const rolleFilter = req.query.role ? String(req.query.role) : null;
+
+      let gefiltert = angereichert;
+      if (q) {
+        gefiltert = gefiltert.filter(
+          (m) =>
+            m.name.toLowerCase().includes(q) ||
+            (m.username ?? '').toLowerCase().includes(q) ||
+            m.id.includes(q) ||
+            m.roleNames.some((r) => r.name.toLowerCase().includes(q)),
+        );
+      }
+      if (rolleFilter) {
+        gefiltert = gefiltert.filter((m) => (m.roles ?? []).includes(rolleFilter));
+      }
+
+      res.json({
+        members: gefiltert.slice(0, Number(req.query.limit ?? 200)),
+        gesamt: gefiltert.length,
+        // Fuer den Filter im Dashboard.
+        roles: roles.map((r) => ({ id: r.id, name: r.name, color: r.color })),
+      });
     } catch (err) {
       handle(res, err, next);
     }
@@ -101,6 +136,31 @@ export function moderationRoutes(db, botToken) {
     const auditReason = `Dashboard: ${text}`;
 
     try {
+      // Letzte Instanz. Die Oberflaeche graut Knoepfe aus, aber dieser
+      // Endpunkt ist auch direkt aufrufbar - ohne Pruefung liesse sich das
+      // Ausgrauen umgehen. Aufhebungen brauchen keine Rangfolge.
+      if (!['unban', 'untimeout'].includes(action)) {
+        const [alle, rollen, guild, botMember] = await Promise.all([
+          getGuildMembers(guildId, botToken),
+          getGuildRoles(guildId, botToken),
+          getGuild(guildId, botToken),
+          getBotMember(guildId, botToken).catch(() => ({ id: null, roleIds: [] })),
+        ]);
+        const ziel = alle.find((x) => String(x.id) === String(userId));
+        // Wer nicht (mehr) auf dem Server ist, laesst sich nur bannen.
+        if (ziel) {
+          const problem = darfAktion({
+            action,
+            member: ziel,
+            rollen: new Map(rollen.map((r) => [String(r.id), r])),
+            ownerId: guild.ownerId,
+            botRoleIds: botMember.roleIds,
+            actorId: actorId === 'dashboard' ? null : actorId,
+          });
+          if (problem) return res.status(403).json({ error: problem });
+        }
+      }
+
       if (action === 'timeout') {
         await timeoutMember(guildId, userId, m, botToken, auditReason);
       } else if (action === 'untimeout') {

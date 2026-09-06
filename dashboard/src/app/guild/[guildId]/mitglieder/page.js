@@ -1,15 +1,21 @@
 import { api, ApiError } from '@/lib/api.js';
 import { Members } from '@/components/Members.js';
 import { Alert } from '@/components/Icons.js';
+import { requireGuildAccess } from '@/lib/guard.js';
 import { moderateMember } from '../actions.js';
 
 export default async function MembersPage({ params }) {
   const { guildId } = await params;
 
-  let members, meta, infractions;
+  // Die eigene Discord-ID, damit die API erkennt, wer gerade zusieht - sonst
+  // koennte man sich selbst bannen.
+  const { session } = await requireGuildAccess(guildId);
+  const actorId = session?.user?.id ?? '';
+
+  let daten, meta, infractions;
   try {
-    [members, meta, infractions] = await Promise.all([
-      api.getMembers(guildId, '?limit=1000'),
+    [daten, meta, infractions] = await Promise.all([
+      api.getMembers(guildId, `?limit=1000&actorId=${encodeURIComponent(actorId)}`),
       api.getMeta(guildId),
       api.getInfractions(guildId, '?limit=200'),
     ]);
@@ -51,7 +57,8 @@ export default async function MembersPage({ params }) {
       </div>
       <Members
         guildId={guildId}
-        members={members}
+        members={daten.members}
+        roles={daten.roles}
         channels={meta.channels}
         infractionCounts={infractionCounts}
         moderateAction={moderateMember}

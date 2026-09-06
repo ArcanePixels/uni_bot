@@ -1,54 +1,81 @@
 'use client';
 
+import { useState } from 'react';
 import { usePathname } from 'next/navigation';
-import { List, Shield, Clock, Play, Gavel, Users, Plus, Wave, Plug, ICON_MAP } from './Icons.js';
+import { List, Plug, ICON_MAP } from './Icons.js';
+import { baueTabs, aktiveGruppe, istAktiv } from '@/lib/tabs.js';
 
 /**
- * Die festen Reiter des Grundsystems. Plugins kommen als `plugins` dazu -
- * die stehen nicht hier, weil sie erst zur Laufzeit bekannt sind.
+ * Die Reiter, in Gruppen.
+ *
+ * Vorher standen alle nebeneinander. Mit jedem Plugin wurde die Zeile laenger,
+ * und auf dem Handy war sie nicht mehr benutzbar. Jetzt gibt es vier
+ * Einstiege; die Unterpunkte erscheinen darunter, sobald eine Gruppe offen ist.
+ *
+ * Welche Gruppe wo hingehoert, steht in `lib/tabs.js` - dort auch die Regel,
+ * in welche Gruppe ein Plugin faellt.
  */
-const TABS = [
-  { slug: '', label: 'Übersicht', icon: List },
-  { slug: 'settings', label: 'Einstellungen', icon: Shield },
-  { slug: 'posts', label: 'Posts', icon: Clock },
-  { slug: 'youtube', label: 'YouTube', icon: Play },
-  { slug: 'wizard', label: 'Wizard', icon: Wave },
-  { slug: 'rechte', label: 'Rechte', icon: Shield },
-  { slug: 'funktionen', label: 'Funktionen', icon: Plus },
-  { slug: 'mitglieder', label: 'Mitglieder', icon: Users },
-  { slug: 'infractions', label: 'Verstöße', icon: Gavel },
-  { slug: 'befehle', label: 'Befehle', icon: Clock },
-  { slug: 'audit', label: 'Audit-Log', icon: List },
-];
-
 export function GuildTabs({ guildId, plugins = [] }) {
   const pathname = usePathname();
-  const base = `/guild/${guildId}`;
+  const { uebersicht, gruppen } = baueTabs(guildId, plugins);
 
-  // Plugin-Reiter kommen hinter denen des Grundsystems, in der Reihenfolge, in
-  // der die Ordner gefunden wurden.
-  const alle = [
-    ...TABS.map((t) => ({ ...t, href: t.slug ? `${base}/${t.slug}` : base })),
-    ...plugins.map((p) => ({
-      slug: `p/${p.name}`,
-      label: p.label,
-      // Das Plugin darf sich ein Symbol aus dem Bestand aussuchen.
-      icon: ICON_MAP[p.icon] ?? Plug,
-      href: `${base}/p/${p.name}`,
-    })),
-  ];
+  // Die Gruppe, in der man gerade steht, ist offen. Klickt man eine andere an,
+  // wechselt die Ansicht - ohne dass die Seite neu geladen wird.
+  const offenAusPfad = aktiveGruppe(pathname, gruppen);
+  const [offen, setOffen] = useState(null);
+  const aktuelleGruppe = offen ?? offenAusPfad;
+
+  const gezeigt = gruppen.find((g) => g.key === aktuelleGruppe);
+  const symbol = (name) => ICON_MAP[name] ?? Plug;
 
   return (
-    <nav className="tabs">
-      {alle.map((t) => {
-        const Icon = t.icon;
-        return (
-          <a key={t.slug} href={t.href} className={pathname === t.href ? 'active' : ''}>
-            <Icon width={15} height={15} />
-            {t.label}
-          </a>
-        );
-      })}
-    </nav>
+    <>
+      <nav className="tabs">
+        <a
+          href={uebersicht.href}
+          className={istAktiv(uebersicht.href, pathname) ? 'active' : ''}
+          onClick={() => setOffen(null)}
+        >
+          <List width={15} height={15} />
+          {uebersicht.label}
+        </a>
+
+        {gruppen.map((g) => {
+          const Icon = symbol(g.icon);
+          const istOffen = g.key === aktuelleGruppe;
+          // Steht man in dieser Gruppe, ist sie hervorgehoben - auch dann,
+          // wenn die Uebersicht daneben liegt.
+          return (
+            <button
+              key={g.key}
+              type="button"
+              className={`tab-group ${istOffen ? 'open' : ''}`}
+              onClick={() => setOffen(istOffen ? null : g.key)}
+              aria-expanded={istOffen}
+            >
+              <Icon width={15} height={15} />
+              {g.label}
+              <span className="caret" aria-hidden="true">
+                {istOffen ? '▾' : '▸'}
+              </span>
+            </button>
+          );
+        })}
+      </nav>
+
+      {gezeigt && (
+        <nav className="tabs sub">
+          {gezeigt.tabs.map((t) => {
+            const Icon = symbol(t.icon);
+            return (
+              <a key={t.slug} href={t.href} className={istAktiv(t.href, pathname) ? 'active' : ''}>
+                <Icon width={14} height={14} />
+                {t.label}
+              </a>
+            );
+          })}
+        </nav>
+      )}
+    </>
   );
 }

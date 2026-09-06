@@ -114,6 +114,10 @@ Nimm auf, was dein Plugin wirklich braucht — jedes zusätzliche Recht ist eine
 das der Nutzer setzen muss. Wer ein Embed postet, braucht `EMBED_LINKS`; das
 wird am häufigsten übersehen, weil der Name nicht nach Embeds klingt.
 
+Mit `"group"` bestimmst du, in welcher Reitergruppe dein Plugin landet:
+`moderation`, `inhalte` oder `server`. Ohne Angabe kommt es zu den Inhalten —
+dort passen die meisten hin.
+
 Als `icon` für den Reiter stehen zur Wahl: `shield`, `wave`, `clock`, `play`,
 `list`, `users`, `gavel`, `plus`, `hash`, `scroll`, `plug`. Ohne Angabe gibt es
 den Stecker.

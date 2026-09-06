@@ -27,6 +27,22 @@ Wie man aktualisiert, steht in [docs/aktualisieren.md](docs/aktualisieren.md).
   davor, gehört Port 3000 nicht nach außen: `DASHBOARD_BIND=127.0.0.1` in die
   `.env`, dann ist das Dashboard nur noch über HTTPS erreichbar.
 
+### Behoben
+
+- **Man konnte sich selbst bannen.** Die Mitgliederliste bot Maßnahmen gegen
+  jeden an, auch gegen den Server-Gründer und gegen einen selbst. Jetzt sind
+  solche Knöpfe ausgegraut, mit Begründung beim Zeigen darauf — und die API
+  weist die Aktion zusätzlich ab, falls jemand den Endpunkt direkt aufruft.
+
+### Geändert
+
+- **Die Reiter sind in Gruppen geordnet** (Moderation, Inhalte, Server). Vorher
+  standen alle nebeneinander und die Leiste wurde mit jedem Plugin länger — auf
+  dem Handy war sie kaum noch benutzbar. Plugins landen von selbst unter
+  „Inhalte" oder wählen mit `"group"` eine andere Gruppe.
+- **Die Mitgliederliste zeigt Rollen** und lässt sich danach filtern. Die Suche
+  greift jetzt auch auf Rollennamen, dazu ein Schalter für „nur mit Verstößen".
+
 ### Sicherheit
 
 - **Express auf 5.2.1**. Die alte Version hatte drei gemeldete Lücken in

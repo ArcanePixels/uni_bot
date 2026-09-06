@@ -73,6 +73,24 @@ Dann im Browser `http://DEINE-SERVER-IP:3000` aufrufen.
 
 ---
 
+## Die Reiter
+
+Die Reiter sind in Gruppen geordnet, damit die Leiste nicht mit jedem Plugin
+länger wird — auf dem Handy war sie sonst kaum noch benutzbar.
+
+| Gruppe | Was drin ist |
+|---|---|
+| **Übersicht** | steht allein, der Einstieg |
+| **Moderation** | Einstellungen, Mitglieder, Verstöße, Audit-Log |
+| **Inhalte** | Posts, YouTube, Befehle — und alle Plugins |
+| **Server** | Wizard, Rechte, Funktionen |
+
+Ein Klick auf eine Gruppe klappt ihre Unterpunkte auf. Wo du gerade stehst,
+ist die passende Gruppe schon offen.
+
+**Plugins** landen von selbst unter „Inhalte". Ein Plugin kann in seiner
+`plugin.json` mit `"group": "moderation"` aber auch eine andere wählen.
+
 ## Was du dort tun kannst
 
 **Übersicht** — die Startseite jedes Servers. Vier Kacheln zeigen, ob Automod
@@ -107,9 +125,24 @@ vorab, Zurücknehmen im Verlauf.
 **Funktionen** — Reaction Roles, Umfragen und das Ticket-Panel anlegen.
 Ausführlich in [funktionen.md](funktionen.md).
 
-**Mitglieder** — die Mitgliederliste mit Verstoßzahlen, auffällige zuerst.
-Verwarnen, Timeout, Kick und Ban direkt von hier; jede Maßnahme zählt in die
-Automod-Eskalation mit und landet im Audit-Log mit deiner Discord-ID.
+**Mitglieder** — die Mitgliederliste mit Rollen und Verstoßzahlen, auffällige
+zuerst. Suchen nach Name, ID oder Rolle, filtern nach Rolle, und ein Schalter
+für „nur mit Verstößen". Verwarnen, Timeout, Kick und Ban direkt von hier; jede
+Maßnahme zählt in die Automod-Eskalation mit und landet im Audit-Log mit deiner
+Discord-ID.
+
+Maßnahmen, die ohnehin scheitern würden, sind ausgegraut — beim Zeigen darauf
+steht der Grund:
+
+| Fall | Warum |
+|---|---|
+| **Server-Gründer** (markiert) | Discord lässt gegen ihn nichts zu |
+| **Du selbst** (markiert) | verhindert versehentliche Selbst-Bans |
+| Höhere Rolle als der Bot | Discord würde die Maßnahme ablehnen |
+| Andere Bots | ergibt selten Sinn |
+
+Verwarnen bleibt auch bei höheren Rollen möglich — es greift niemanden an,
+sondern notiert nur etwas.
 
 **Befehle** — eigene Textbefehle anlegen, Nachrichten-Log einsehen,
 Sicherungen verwalten. Ausführlich in

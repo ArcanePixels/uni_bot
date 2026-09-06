@@ -122,22 +122,35 @@ function ActionDialog({ member, action, channels, onConfirm, onCancel, pending }
   );
 }
 
-export function Members({ guildId, members, channels, infractionCounts, moderateAction }) {
+export function Members({
+  guildId,
+  members,
+  roles = [],
+  channels,
+  infractionCounts,
+  moderateAction,
+}) {
   const [query, setQuery] = useState('');
+  const [rolleFilter, setRolleFilter] = useState('');
+  const [nurAuffaellige, setNurAuffaellige] = useState(false);
   const [dialog, setDialog] = useState(null); // { member, action }
   const [status, setStatus] = useState(null);
   const [pending, startTransition] = useTransition();
 
   const shown = useMemo(() => {
     const q = query.toLowerCase().trim();
-    const list = q
+    let list = q
       ? members.filter(
           (m) =>
             m.name.toLowerCase().includes(q) ||
             (m.username ?? '').toLowerCase().includes(q) ||
-            m.id.includes(q),
+            m.id.includes(q) ||
+            (m.roleNames ?? []).some((r) => r.name.toLowerCase().includes(q)),
         )
       : members;
+
+    if (rolleFilter) list = list.filter((m) => (m.roles ?? []).includes(rolleFilter));
+    if (nurAuffaellige) list = list.filter((m) => (infractionCounts[m.id] ?? 0) > 0);
     // Auffällige zuerst – danach alphabetisch.
     return [...list].sort((a, b) => {
       const ca = infractionCounts[a.id] ?? 0;
@@ -145,7 +158,7 @@ export function Members({ guildId, members, channels, infractionCounts, moderate
       if (ca !== cb) return cb - ca;
       return a.name.localeCompare(b.name, 'de');
     });
-  }, [members, query, infractionCounts]);
+  }, [members, query, rolleFilter, nurAuffaellige, infractionCounts]);
 
   function run(member, action, extra) {
     setStatus(null);
@@ -225,14 +238,47 @@ export function Members({ guildId, members, channels, infractionCounts, moderate
           </div>
         </div>
 
-        <div className="field">
+        <div className="filter-row">
           <input
             type="text"
-            placeholder="Nach Name oder ID suchen…"
+            placeholder="Nach Name, ID oder Rolle suchen…"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
           />
+          <select value={rolleFilter} onChange={(e) => setRolleFilter(e.target.value)}>
+            <option value="">Alle Rollen</option>
+            {roles.map((r) => (
+              <option key={r.id} value={r.id}>
+                {r.name}
+              </option>
+            ))}
+          </select>
+          <label className="switch inline">
+            <input
+              type="checkbox"
+              checked={nurAuffaellige}
+              onChange={(e) => setNurAuffaellige(e.target.checked)}
+            />
+            <span>Nur mit Verstößen</span>
+          </label>
+          {(query || rolleFilter || nurAuffaellige) && (
+            <button
+              className="ghost small"
+              onClick={() => {
+                setQuery('');
+                setRolleFilter('');
+                setNurAuffaellige(false);
+              }}
+            >
+              Zurücksetzen
+            </button>
+          )}
         </div>
+        <p className="help">
+          {shown.length === members.length
+            ? `${members.length} Mitglieder`
+            : `${shown.length} von ${members.length} Mitgliedern`}
+        </p>
 
         {shown.length === 0 ? (
           <div className="empty">
@@ -245,6 +291,7 @@ export function Members({ guildId, members, channels, infractionCounts, moderate
               <thead>
                 <tr>
                   <th>Mitglied</th>
+                  <th>Rollen</th>
                   <th>Beigetreten</th>
                   <th>Verstöße</th>
                   <th>Status</th>
@@ -274,7 +321,44 @@ export function Members({ guildId, members, channels, infractionCounts, moderate
                             </span>
                           </span>
                           {m.bot && <span className="badge">BOT</span>}
+                          {m.istGruender && (
+                            <span className="badge owner" title="Server-Gründer">
+                              GRÜNDER
+                            </span>
+                          )}
+                          {m.istSelbst && <span className="badge">DU</span>}
                         </span>
+                      </td>
+                      <td>
+                        {(m.roleNames ?? []).length === 0 ? (
+                          <span className="dim">–</span>
+                        ) : (
+                          <span className="role-chips">
+                            {/* Nur die drei hoechsten - sonst sprengt eine Zeile
+                                die Tabelle. Der Rest steht im Titel. */}
+                            {m.roleNames.slice(0, 3).map((r) => (
+                              <span
+                                key={r.id}
+                                className="role-chip"
+                                style={
+                                  r.color
+                                    ? { color: `#${r.color.toString(16).padStart(6, '0')}` }
+                                    : undefined
+                                }
+                              >
+                                {r.name}
+                              </span>
+                            ))}
+                            {m.roleNames.length > 3 && (
+                              <span
+                                className="role-chip dim"
+                                title={m.roleNames.map((r) => r.name).join(', ')}
+                              >
+                                +{m.roleNames.length - 3}
+                              </span>
+                            )}
+                          </span>
+                        )}
                       </td>
                       <td className="dim nowrap">{formatJoined(m.joinedAt)}</td>
                       <td>
@@ -292,14 +376,21 @@ export function Members({ guildId, members, channels, infractionCounts, moderate
                         )}
                       </td>
                       <td className="nowrap">
-                        {m.bot ? (
-                          <span className="dim">–</span>
+                        {/* Was Discord ohnehin ablehnt, wird gar nicht erst
+                            angeboten - sonst klickt man auf einen Knopf, der
+                            nur eine Fehlermeldung bringt. Der Grund steht im
+                            Titel, damit klar ist warum. */}
+                        {!m.kannVerwarnen && !m.kannEingreifen ? (
+                          <span className="dim" title={m.schutzGrund ?? undefined}>
+                            {m.istGruender ? 'Gründer' : m.istSelbst ? 'du selbst' : '–'}
+                          </span>
                         ) : (
                           <span style={{ display: 'flex', gap: 4 }}>
                             <button
                               className="ghost small"
                               onClick={() => setDialog({ member: m, action: 'warn' })}
-                              disabled={pending}
+                              disabled={pending || !m.kannVerwarnen}
+                              title={m.kannVerwarnen ? undefined : m.schutzGrund}
                             >
                               Warnen
                             </button>
@@ -315,7 +406,8 @@ export function Members({ guildId, members, channels, infractionCounts, moderate
                               <button
                                 className="ghost small"
                                 onClick={() => setDialog({ member: m, action: 'timeout' })}
-                                disabled={pending}
+                                disabled={pending || !m.kannEingreifen}
+                                title={m.kannEingreifen ? undefined : m.schutzGrund}
                               >
                                 Timeout
                               </button>
@@ -323,14 +415,16 @@ export function Members({ guildId, members, channels, infractionCounts, moderate
                             <button
                               className="ghost small"
                               onClick={() => setDialog({ member: m, action: 'kick' })}
-                              disabled={pending}
+                              disabled={pending || !m.kannEingreifen}
+                              title={m.kannEingreifen ? undefined : m.schutzGrund}
                             >
                               Kick
                             </button>
                             <button
                               className="danger small"
                               onClick={() => setDialog({ member: m, action: 'ban' })}
-                              disabled={pending}
+                              disabled={pending || !m.kannEingreifen}
+                              title={m.kannEingreifen ? undefined : m.schutzGrund}
                             >
                               Ban
                             </button>

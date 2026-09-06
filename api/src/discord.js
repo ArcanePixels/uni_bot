@@ -173,7 +173,9 @@ export async function getGuildRoles(guildId, botToken) {
 export async function getGuild(guildId, botToken) {
   return cached(`guild:${guildId}`, async () => {
     const g = await call(`/guilds/${guildId}`, botToken);
-    return { id: g.id, name: g.name, icon: g.icon };
+    // ownerId wird gebraucht, um den Server-Gruender vor Massnahmen zu
+    // schuetzen - Discord laesst gegen ihn ohnehin nichts zu.
+    return { id: g.id, name: g.name, icon: g.icon, ownerId: g.owner_id ?? null };
   });
 }
 
