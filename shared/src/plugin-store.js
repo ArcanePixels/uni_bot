@@ -361,6 +361,16 @@ export function createPluginStore(db, manifest) {
 
     markDirty: markiere,
 
+    /**
+     * Alle Server, fuer die dieses Plugin Daten hat.
+     *
+     * Fuer Plugins, die regelmaessig von sich aus taetig werden - anders als
+     * `pendingGuilds`, das nur auf angestossene Auftraege reagiert.
+     */
+    allGuilds() {
+      return db.prepare(`SELECT * FROM ${configTabelle}`).all();
+    },
+
     /** Alle Server, bei denen der Bot etwas zu tun hat. */
     pendingGuilds() {
       return db.prepare(`SELECT * FROM ${configTabelle} WHERE dirty = 1`).all();

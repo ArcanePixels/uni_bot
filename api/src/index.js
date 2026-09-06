@@ -78,7 +78,24 @@ if (plugins.length) {
   console.log(`[api] ${plugins.length} Plugin(s): ${plugins.map((p) => p.name).join(', ')}`);
 }
 
-const server = createApp(db, token, botToken, backupConfig, plugins, pluginRouters).listen(
+// Geheimnis fuer den Twitch-Webhook. Fehlt es, gibt es den Endpunkt nicht -
+// dann laeuft die Livemeldung nur ueber die Abfrage im Intervall.
+const twitchSecret = process.env.TWITCH_WEBHOOK_SECRET?.trim() || null;
+if (twitchSecret && twitchSecret.length < 10) {
+  console.error('[api] TWITCH_WEBHOOK_SECRET ist zu kurz (mindestens 10 Zeichen). Webhook bleibt aus.');
+}
+const twitchWebhook = twitchSecret && twitchSecret.length >= 10 ? twitchSecret : null;
+if (twitchWebhook) console.log('[api] Twitch-Webhook aktiv unter /twitch/webhook');
+
+const server = createApp(
+  db,
+  token,
+  botToken,
+  backupConfig,
+  plugins,
+  pluginRouters,
+  twitchWebhook,
+).listen(
   port,
   () => {
     console.log(`[api] Lauscht auf Port ${port}`);

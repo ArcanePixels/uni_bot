@@ -5,6 +5,25 @@ Versionierung nach [Semantic Versioning](https://semver.org/lang/de/).
 
 Wie man aktualisiert, steht in [docs/aktualisieren.md](docs/aktualisieren.md).
 
+## [Unveröffentlicht]
+
+### Hinzugefügt
+
+- **Twitch-Livemeldung** als mitgeliefertes Plugin: Der Bot meldet im Discord,
+  wenn ein beobachteter Kanal live geht — mit Streamtitel, Spiel, Zuschauerzahl
+  und Vorschaubild, wahlweise mit Rollen-Erwähnung.
+
+  Zwei Wege, beide gleichzeitig aktiv: Ohne weitere Einrichtung fragt der Bot
+  jede Minute bei Twitch nach. Mit einer Domain und HTTPS meldet Twitch sich
+  selbst, und die Nachricht steht **binnen Sekunden** im Discord. Doppelte
+  Meldungen sind ausgeschlossen — maßgeblich ist die Stream-ID, die Twitch je
+  Sendung vergibt.
+
+  Braucht eine kostenlose Twitch-Anwendung. Alles beschrieben in
+  [docs/twitch-plugin.md](docs/twitch-plugin.md).
+- Plugins können über `store.allGuilds()` alle Server abfragen, für die sie
+  Daten haben — für Plugins, die regelmäßig von sich aus tätig werden.
+
 ## [1.1.0] – 2026-08-23
 
 ### Hinzugefügt

@@ -12,6 +12,7 @@ import { wizardRoutes } from './routes/wizard.js';
 import { backupRoutes } from './routes/backup.js';
 import { commandRoutes } from './routes/commands.js';
 import { pluginRoutes } from './routes/plugins.js';
+import { twitchWebhookRoutes, ensureTwitchEventTable } from './routes/twitch-webhook.js';
 
 /**
  * Baut die API.
@@ -27,8 +28,21 @@ export function createApp(
   backupConfig = null,
   plugins = [],
   pluginRouters = new Map(),
+  twitchWebhookSecret = null,
 ) {
   const app = express();
+
+  // Der Twitch-Webhook MUSS vor express.json() stehen: Die Signatur wird ueber
+  // den unveraenderten Text der Anfrage gebildet. Waere der schon geparst und
+  // wieder zusammengesetzt, stimmte sie nicht mehr.
+  //
+  // Er liegt ausserdem bewusst ausserhalb der Token-Pruefung - Twitch kennt
+  // unser API-Token nicht und weist sich stattdessen per Signatur aus.
+  if (twitchWebhookSecret) {
+    ensureTwitchEventTable(db);
+    app.use('/twitch/webhook', twitchWebhookRoutes(db, { secret: twitchWebhookSecret }));
+  }
+
   app.use(express.json({ limit: '256kb' }));
 
   // Healthcheck bewusst ohne Auth, damit Docker den Container pruefen kann.

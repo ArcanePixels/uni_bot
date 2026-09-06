@@ -29,6 +29,9 @@ Ein `_` vor dem Ordnernamen schaltet ein Plugin vorübergehend ab.
 
 - **`regeln/`** — Serverregeln zusammenstellen und als Nachricht posten.
   Mitgeliefert und zugleich die Vorlage für eigene Plugins.
+- **`twitch/`** — meldet im Discord, wenn ein Twitch-Kanal live geht. Zeigt,
+  wie ein Plugin einen äußeren Dienst anbindet und einen öffentlichen
+  Webhook-Endpunkt bekommt. Siehe [docs/twitch-plugin.md](../docs/twitch-plugin.md).
 - **`beispiel-geburtstag.js.txt`** — ein reines Bot-Plugin im älteren
   Einzeldatei-Format. Zum Ausprobieren die Endung `.txt` entfernen.
 

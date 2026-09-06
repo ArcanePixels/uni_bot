@@ -33,6 +33,7 @@ eine dauerhafte Verbindung.
 [Was gespeichert wird](docs/datenschutz.md) ·
 [Eigene Plugins](docs/plugin-entwickeln.md) ·
 [Serverregeln](docs/regeln-plugin.md) ·
+[Twitch](docs/twitch-plugin.md) ·
 [Aktualisieren](docs/aktualisieren.md)
 
 ## Was er kann
@@ -46,6 +47,8 @@ eine dauerhafte Verbindung.
 - **Audit-Log** — wer hat wann was ausgelöst
 - **Serverregeln** — im Dashboard zusammenstellen, der Bot postet sie als Embed
   und hält sie aktuell (mitgeliefertes Plugin, siehe `plugins/regeln/`)
+- **Twitch-Livemeldung** — meldet im Discord, wenn ein Kanal live geht. Per
+  Webhook in Sekunden, sonst rund jede Minute (mitgeliefertes Plugin)
 - **Plugin-System** — eigene Erweiterungen bekommen ihre Dashboard-Seite aus
   einer `plugin.json`. Ordner hineinlegen, neu starten, fertig — ohne Neubau
 - **Dashboard** — alles davon im Browser einstellen, mit Discord-Login und

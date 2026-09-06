@@ -12,7 +12,8 @@
     "./slash-commands": "./src/slash-commands.js",
     "./plugin-manifest": "./src/plugin-manifest.js",
     "./plugin-discovery": "./src/plugin-discovery.js",
-    "./plugin-store": "./src/plugin-store.js"
+    "./plugin-store": "./src/plugin-store.js",
+    "./twitch": "./src/twitch.js"
   },
   "dependencies": {
     "better-sqlite3": "^11.7.0"

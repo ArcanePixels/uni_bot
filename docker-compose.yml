@@ -17,6 +17,14 @@ services:
       # node_modules nur oberhalb des Modulpfads. Aus einem Ordner ausserhalb
       # koennte ein Plugin discord.js nicht importieren.
       PLUGIN_DIR: /app/plugins
+      # Twitch-Livemeldung (optional). Anwendung anlegen unter
+      # dev.twitch.tv/console/apps - ohne die Werte bleibt das Plugin still.
+      TWITCH_CLIENT_ID: ${TWITCH_CLIENT_ID:-}
+      TWITCH_CLIENT_SECRET: ${TWITCH_CLIENT_SECRET:-}
+      # Oeffentliche Adresse des Webhooks, z. B.
+      # https://bot.deine-domain.de/twitch/webhook - Twitch nimmt nur https.
+      TWITCH_WEBHOOK_URL: ${TWITCH_WEBHOOK_URL:-}
+      TWITCH_WEBHOOK_SECRET: ${TWITCH_WEBHOOK_SECRET:-}
     volumes:
       - botdata:/data
       # Eigene Plugins: Datei nach ./plugins legen und den Bot neu starten.
@@ -47,6 +55,12 @@ services:
       # Dashboard die Reiter und die Daten dazu. Ohne das gaebe es kein Plugin
       # im Dashboard zu sehen.
       PLUGIN_DIR: /app/plugins
+      # Nur fuer den Twitch-Webhook: Twitch weist sich damit aus. Fehlt der
+      # Wert, gibt es den Endpunkt nicht und die Meldung laeuft ueber die
+      # Abfrage im Intervall.
+      TWITCH_WEBHOOK_SECRET: ${TWITCH_WEBHOOK_SECRET:-}
+      TWITCH_CLIENT_ID: ${TWITCH_CLIENT_ID:-}
+      TWITCH_CLIENT_SECRET: ${TWITCH_CLIENT_SECRET:-}
     ports:
       # Nur auf localhost binden - nach aussen geht es spaeter ueber den
       # Cloudflare Tunnel, nicht ueber einen offenen Port am Router.
@@ -84,7 +98,10 @@ services:
       AUTH_URL: ${AUTH_URL:?AUTH_URL fehlt in der .env}
       AUTH_TRUST_HOST: "true"
     ports:
-      - "${DASHBOARD_PORT:-3000}:3000"
+      # Laeuft ein Reverse Proxy davor (Caddy, nginx), gehoert der Port nicht
+      # nach aussen: DASHBOARD_BIND=127.0.0.1 in die .env, dann ist das
+      # Dashboard nur noch ueber den Proxy und damit ueber HTTPS erreichbar.
+      - "${DASHBOARD_BIND:-0.0.0.0}:${DASHBOARD_PORT:-3000}:3000"
 
   # Optional: HTTPS-Zugang von aussen ohne offenen Port am Router.
   # Startet nur mit:  docker compose --profile tunnel up -d
