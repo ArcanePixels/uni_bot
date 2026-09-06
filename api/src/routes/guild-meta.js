@@ -14,6 +14,34 @@ export function guildMetaRoutes(botToken) {
   router.get('/schema', (_req, res) => res.json(SETTINGS_SCHEMA));
 
   /**
+   * Ist der Bot auf diesem Server?
+   *
+   * Ohne diese Auskunft laeuft man in Seiten, die mit einer Discord-Fehler-
+   * meldung abbrechen - ohne zu sagen, dass schlicht die Einladung fehlt.
+   *
+   * Bewusst schlank: nur ein ja/nein, keine Serverdaten. Der Aufrufer hat
+   * seine Berechtigung ohnehin schon nachgewiesen.
+   */
+  router.get('/:guildId/bot-status', async (req, res) => {
+    if (!botToken) {
+      return res.json({ vorhanden: false, grund: 'kein-token' });
+    }
+    try {
+      await getGuild(req.params.guildId, botToken);
+      return res.json({ vorhanden: true });
+    } catch (err) {
+      // 403 und 404 heissen beide: Der Bot kommt an diesen Server nicht heran.
+      // Discord unterscheidet da nicht verlaesslich.
+      if (err instanceof DiscordError && (err.status === 403 || err.status === 404)) {
+        return res.json({ vorhanden: false, grund: 'nicht-eingeladen' });
+      }
+      // Ein Ausfall bei Discord ist etwas anderes als eine fehlende Einladung -
+      // sonst raet man dem Nutzer, etwas einzuladen, was laengst da ist.
+      return res.json({ vorhanden: null, grund: 'discord-nicht-erreichbar' });
+    }
+  });
+
+  /**
    * Nur die Akzentfarbe. Das Layout braucht sonst nichts, wuerde ueber /meta
    * aber Kanaele und Rollen mitladen - drei Discord-Abfragen je Seitenaufruf
    * zusaetzlich, obwohl die Seite darunter dieselben Daten ohnehin holt.

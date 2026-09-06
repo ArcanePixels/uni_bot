@@ -55,6 +55,7 @@ export const api = {
   getSchema: () => request('/api/guilds/schema'),
   getMeta: (guildId) => request(g(guildId, '/meta')),
   getAccent: (guildId) => request(g(guildId, '/accent')),
+  getBotStatus: (guildId) => request(g(guildId, '/bot-status')),
 
   getSettings: (guildId) => request(g(guildId, '/settings')),
   saveSettings: (guildId, settings) =>

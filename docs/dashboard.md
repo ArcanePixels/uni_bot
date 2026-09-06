@@ -73,6 +73,23 @@ Dann im Browser `http://DEINE-SERVER-IP:3000` aufrufen.
 
 ---
 
+## Wenn der Bot noch nicht auf dem Server ist
+
+Öffnest du einen Server, auf dem der Bot fehlt, steht dort statt der
+Einstellungen ein Hinweis mit einem Einladungs-Knopf.
+
+Der Knopf **fügt nichts hinzu**. Er führt zu Discords eigener Seite, wo du den
+Server auswählst und bestätigst. Einladen kann nur, wer dort „Server verwalten"
+darf — das entscheidet Discord, nicht der Bot.
+
+Welche Rechte der Bot bekommt, steht ausklappbar daneben. **Administrator ist
+bewusst nicht dabei** — jedes Recht ist einzeln aufgeführt und begründet. Du
+kannst sie auf der Discord-Seite noch einschränken; dann funktionieren die
+betroffenen Funktionen aber nicht.
+
+> Fehlt `DISCORD_CLIENT_ID` in der `.env` des Dashboards, gibt es keinen Link.
+> Dann muss der Betreiber den Bot von Hand einladen.
+
 ## Die Reiter
 
 Die Reiter sind in Gruppen geordnet, damit die Leiste nicht mit jedem Plugin

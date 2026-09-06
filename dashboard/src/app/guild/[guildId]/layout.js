@@ -4,6 +4,7 @@ import { api } from '@/lib/api.js';
 import { TopBar } from '@/components/TopBar.js';
 import { GuildTabs } from '@/components/GuildTabs.js';
 import { getPluginList } from '@/lib/plugin-cache.js';
+import { BotFehlt } from '@/components/BotFehlt.js';
 import { AccentStyle } from '@/components/AccentStyle.js';
 import { Alert } from '@/components/Icons.js';
 
@@ -36,6 +37,19 @@ export default async function GuildLayout({ children, params }) {
   // Aufruf laeuft.
   const plugins = await getPluginList();
 
+  // Ist der Bot ueberhaupt auf diesem Server? Ohne ihn scheitern die
+  // Unterseiten mit einer Discord-Fehlermeldung, ohne den Grund zu nennen.
+  // Faellt die Auskunft aus, zeigen wir die Seiten normal - ein Ausfall bei
+  // Discord soll nicht dazu fuehren, dass jemand einen Bot einlaedt, der
+  // laengst da ist.
+  let botFehlt = false;
+  try {
+    const status = await api.getBotStatus(guildId);
+    botFehlt = status?.vorhanden === false;
+  } catch {
+    botFehlt = false;
+  }
+
   // Akzentfarbe aus dem Server-Icon. Faellt das aus, bleibt die Markenfarbe -
   // deshalb bewusst ohne Fehlerbehandlung nach aussen.
   let accent = null;
@@ -55,7 +69,7 @@ export default async function GuildLayout({ children, params }) {
       <TopBar user={session.user} guildName={guild.name} guildIcon={iconUrl} />
       <div className="container">
         <GuildTabs guildId={guildId} plugins={plugins} />
-        {children}
+        {botFehlt ? <BotFehlt guildId={guildId} guildName={guild.name} /> : children}
       </div>
     </>
   );

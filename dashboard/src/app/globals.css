@@ -1124,3 +1124,46 @@ td.dim {
     padding: 7px 9px;
   }
 }
+
+/* --- Hinweis: Bot fehlt auf dem Server ----------------------------------- */
+
+.bot-fehlt p {
+  max-width: 640px;
+  line-height: 1.6;
+}
+.bot-fehlt .notice {
+  margin-bottom: 16px;
+}
+.bot-fehlt .notice .help {
+  margin: 4px 0 0;
+}
+.bot-fehlt .btn {
+  margin-top: 16px;
+}
+
+/* Die Rechteliste bleibt zugeklappt - wer sie sehen will, klappt sie auf.
+   Ausgeklappt waere sie eine Wand aus Text vor dem eigentlichen Knopf. */
+.rechte-liste {
+  margin: 14px 0 0;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 10px 14px;
+  max-width: 640px;
+}
+.rechte-liste summary {
+  cursor: pointer;
+  font-size: 13.5px;
+  color: var(--text-dim);
+}
+.rechte-liste summary:hover {
+  color: var(--text);
+}
+.rechte-liste ul {
+  margin: 12px 0 0;
+  padding-left: 20px;
+  font-size: 13.5px;
+  line-height: 1.7;
+}
+.rechte-liste .help {
+  margin-top: 10px;
+}

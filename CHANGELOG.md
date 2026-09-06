@@ -29,6 +29,13 @@ Wie man aktualisiert, steht in [docs/aktualisieren.md](docs/aktualisieren.md).
 
 ### Hinzugefügt
 
+- **Hinweis, wenn der Bot auf einem Server fehlt.** Vorher lief man in Seiten,
+  die mit einer Discord-Fehlermeldung abbrachen, ohne den Grund zu nennen. Jetzt
+  steht dort ein Hinweis mit Einladungs-Knopf — samt Auflistung, welche Rechte
+  der Bot bekommt und wofür. Administrator ist bewusst nicht dabei.
+
+  Der Knopf fügt nichts hinzu: Er führt zu Discords eigener Bestätigungsseite,
+  und einladen kann nur, wer dort „Server verwalten" darf.
 - **Aufräumen alter Einträge.** Audit-Log und Verstöße wuchsen bisher unbegrenzt
   weiter — langsam, aber ohne Ende. Der Bot räumt jetzt einmal täglich auf:
   Audit-Log nach 180 Tagen, Verstöße nach 365. Über `AUDIT_KEEP_DAYS` und
