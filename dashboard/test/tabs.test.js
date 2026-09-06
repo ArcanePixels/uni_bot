@@ -136,3 +136,46 @@ test('Der aktive Reiter wird genau erkannt', () => {
   assert.equal(istAktiv(`/guild/${G}/posts`, `/guild/${G}/postsxyz`), false);
   assert.equal(istAktiv(`/guild/${G}`, `/guild/${G}/posts`), false);
 });
+
+// --- Sortierung -----------------------------------------------------------
+
+test('Innerhalb einer Gruppe wird alphabetisch sortiert', () => {
+  const { gruppen } = baueTabs(G);
+  for (const g of gruppen) {
+    const labels = g.tabs.map((t) => t.label);
+    const sortiert = [...labels].sort((a, b) => a.localeCompare(b, 'de'));
+    assert.deepEqual(labels, sortiert, `Gruppe "${g.label}" ist nicht sortiert`);
+  }
+});
+
+test('Plugins reihen sich alphabetisch ein, nicht hinten an', () => {
+  // Vorher hing die Reihenfolge davon ab, wie die Ordner gelesen wurden.
+  const { gruppen } = baueTabs(G, [
+    { name: 'twitch', label: 'Twitch' },
+    { name: 'aaa', label: 'AAA-Plugin' },
+  ]);
+  const inhalte = gruppen.find((g) => g.key === 'inhalte');
+  const labels = inhalte.tabs.map((t) => t.label);
+
+  assert.equal(labels[0], 'AAA-Plugin', 'ein Plugin darf auch vorne stehen');
+  assert.deepEqual(labels, [...labels].sort((a, b) => a.localeCompare(b, 'de')));
+});
+
+test('Die Reihenfolge hängt nicht davon ab, wie die Plugins ankommen', () => {
+  // Sonst sähe die Leiste nach jedem Neustart anders aus.
+  const a = baueTabs(G, [{ name: 'twitch', label: 'Twitch' }, { name: 'regeln', label: 'Regeln' }]);
+  const b = baueTabs(G, [{ name: 'regeln', label: 'Regeln' }, { name: 'twitch', label: 'Twitch' }]);
+
+  const labels = (r) => r.gruppen.flatMap((g) => g.tabs.map((t) => t.label));
+  assert.deepEqual(labels(a), labels(b));
+});
+
+test('Umlaute werden richtig einsortiert', () => {
+  // "Verstöße" muss zwischen V und W landen, nicht am Ende.
+  const { gruppen } = baueTabs(G);
+  const moderation = gruppen.find((g) => g.key === 'moderation');
+  const labels = moderation.tabs.map((t) => t.label);
+  assert.ok(labels.includes('Verstöße'));
+  assert.deepEqual(labels, [...labels].sort((a, b) => a.localeCompare(b, 'de')));
+});
+

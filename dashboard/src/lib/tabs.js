@@ -78,6 +78,14 @@ export function baueTabs(guildId, plugins = []) {
     });
   }
 
+  // Innerhalb einer Gruppe alphabetisch. Sonst haengt die Reihenfolge davon
+  // ab, wie die Plugin-Ordner gelesen wurden - und Verwandtes stand
+  // auseinander: YouTube und Twitch tun dasselbe, standen aber getrennt,
+  // weil "Befehle" dazwischenlag.
+  for (const g of gruppen) {
+    g.tabs.sort((a, b) => a.label.localeCompare(b.label, 'de'));
+  }
+
   return { uebersicht: { ...UEBERSICHT, href: href('') }, gruppen };
 }
 
