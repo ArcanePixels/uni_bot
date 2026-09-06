@@ -27,8 +27,17 @@ Wie man aktualisiert, steht in [docs/aktualisieren.md](docs/aktualisieren.md).
   davor, gehört Port 3000 nicht nach außen: `DASHBOARD_BIND=127.0.0.1` in die
   `.env`, dann ist das Dashboard nur noch über HTTPS erreichbar.
 
+### Hinzugefügt
+
+- **Aufräumen alter Einträge.** Audit-Log und Verstöße wuchsen bisher unbegrenzt
+  weiter — langsam, aber ohne Ende. Der Bot räumt jetzt einmal täglich auf:
+  Audit-Log nach 180 Tagen, Verstöße nach 365. Über `AUDIT_KEEP_DAYS` und
+  `INFRACTION_KEEP_DAYS` einstellbar, `0` schaltet ab.
+
 ### Behoben
 
+- **Die Container-Logs wuchsen unbegrenzt** und hätten auf Dauer die Platte
+  gefüllt. Jetzt drei Dateien zu 10 MB je Dienst.
 - **Man konnte sich selbst bannen.** Die Mitgliederliste bot Maßnahmen gegen
   jeden an, auch gegen den Server-Gründer und gegen einen selbst. Jetzt sind
   solche Knöpfe ausgegraut, mit Begründung beim Zeigen darauf — und die API

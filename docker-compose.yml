@@ -1,8 +1,18 @@
+# Ohne Begrenzung schreibt Docker die Logs unbegrenzt weiter und fuellt
+# irgendwann die Platte. Drei Dateien zu 10 MB reichen weit zurueck und
+# kosten hoechstens 30 MB je Container.
+x-logging: &logging
+  driver: json-file
+  options:
+    max-size: "10m"
+    max-file: "3"
+
 services:
   bot:
     # Fertiges Image (per "docker load" eingespielt). Das "build" darunter
     # greift nur, wenn das Image fehlt und du selbst bauen willst.
     image: allrounder-bot:latest
+    logging: *logging
     build:
       context: .
       dockerfile: bot/Dockerfile
@@ -33,6 +43,7 @@ services:
 
   api:
     image: allrounder-api:latest
+    logging: *logging
     build:
       context: .
       dockerfile: api/Dockerfile
@@ -78,6 +89,7 @@ services:
 
   dashboard:
     image: allrounder-dashboard:latest
+    logging: *logging
     build:
       context: .
       dockerfile: dashboard/Dockerfile
@@ -108,6 +120,7 @@ services:
   # Einrichtung siehe docs/cloudflare-tunnel.md
   cloudflared:
     image: cloudflare/cloudflared:latest
+    logging: *logging
     container_name: allrounder-tunnel
     restart: unless-stopped
     profiles: [tunnel]

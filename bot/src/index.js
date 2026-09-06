@@ -8,6 +8,7 @@ import { InfractionService } from './core/infractions.js';
 import { AuditService } from './core/audit.js';
 import { PluginHost } from './core/plugin-host.js';
 import { loadExternalPlugins } from './core/plugin-loader.js';
+import { starteAufraeumen } from './core/aufraeumen.js';
 import { discoverPlugins } from '@allrounder/shared/plugin-discovery';
 import { createPluginStore } from '@allrounder/shared/plugin-store';
 
@@ -56,6 +57,10 @@ const client = new Client({
 
 const host = new PluginHost({ client, db, settings, infractions, audit });
 
+// Audit-Log und Verstoesse wuchsen bisher unbegrenzt weiter. Ueber
+// AUDIT_KEEP_DAYS und INFRACTION_KEEP_DAYS einstellbar, 0 schaltet ab.
+const stoppeAufraeumen = starteAufraeumen({ db, log });
+
 /**
  * Die API schreibt in dieselbe Datei, ohne dass der Bot davon erfaehrt.
  * Statt Cache-Invalidierung ueber einen Kanal zwischen den Containern
@@ -95,6 +100,7 @@ client.once('clientReady', async () => {
 async function shutdown(signal) {
   log.info(`${signal} empfangen, fahre herunter`);
   clearInterval(pollSettings);
+  stoppeAufraeumen();
   await host.teardown();
   await client.destroy();
   db.close();

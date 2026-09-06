@@ -145,3 +145,41 @@ docker run --rm -v discord-allrounder_botdata:/data -v /pfad/zum/ziel:/backup al
 ```
 
 Als Cron-Job auf dem Server eingerichtet, läuft das von selbst.
+
+---
+
+## Was mit der Zeit wächst — und was dagegen läuft
+
+Vier Dinge sammeln sich an. Drei räumen sich selbst auf, eines braucht deine
+Aufmerksamkeit.
+
+| Was | Standard | Wo einstellbar |
+|---|---|---|
+| **Nachrichten-Log** | 30 Tage | Dashboard → Einstellungen |
+| **Audit-Log** | 180 Tage | `AUDIT_KEEP_DAYS` in der `.env` |
+| **Verstöße** | 365 Tage | `INFRACTION_KEEP_DAYS` in der `.env` |
+| **Container-Logs** | 3 × 10 MB je Dienst | `docker-compose.yml` |
+
+Der Bot räumt einmal täglich auf, erstmals eine Minute nach dem Start. `0`
+schaltet das Aufräumen für die jeweilige Tabelle ab — dann bleibt alles.
+
+**Der Nachrichten-Log ist der größte Posten**, wenn er eingeschaltet ist: Er
+schreibt bearbeitete und gelöschte Nachrichten mit. Er ist standardmäßig **aus**
+und muss bewusst aktiviert werden. Kanäle lassen sich ausnehmen.
+
+**Zu den Container-Logs:** Ohne Begrenzung schreibt Docker unbegrenzt weiter,
+bis die Platte voll ist. Drei Dateien zu 10 MB je Dienst reichen weit zurück und
+kosten höchstens 30 MB pro Container.
+
+Nachsehen, wie viel Platz gerade belegt ist:
+
+```bash
+docker ps -q | xargs -I{} sh -c 'docker inspect --format="{{.Name}}" {} && du -sh $(docker inspect --format="{{.LogPath}}" {}) 2>/dev/null'
+```
+
+Und wie groß die Datenbank ist:
+
+```bash
+docker compose exec api du -sh /data/bot.sqlite
+```
+
