@@ -204,3 +204,93 @@ test('Server sehen einander nicht', () => {
 
   db.close();
 });
+
+// --- Wettlauf zwischen Webhook und Abfrage --------------------------------
+
+test('Webhook und Abfrage melden dieselbe Sendung nur einmal', () => {
+  // Der Fall aus dem Betrieb: Beide Wege sehen dieselbe Sendung im Abstand
+  // von Sekunden. Wuerde jeder erst pruefen, dann senden und danach
+  // vermerken, schoeben sich beide in die Luecke - das Senden an Discord
+  // dauert lange genug dafuer. Genau so kam es zu zwei Meldungen.
+  const db = new Database(':memory:');
+  const store = createPluginStore(db, MANIFEST);
+  store.saveConfig('g1', { channel_id: 'c1' });
+
+  const stream = { id: '4711', login: 'gronkh', name: 'Gronkh' };
+  const belege = () =>
+    store.belegeEinmalig(
+      'g1',
+      'gemeldet',
+      {
+        ...(store.getState('g1').gemeldet ?? {}),
+        [stream.login]: { streamId: stream.id, zeit: Date.now() },
+      },
+      (bestehend) => schonGemeldet(bestehend ?? {}, stream.login, stream.id, 60),
+    );
+
+  // Beide Wege versuchen es - nur einer darf durchkommen.
+  const ergebnisse = [belege(), belege()];
+  assert.deepEqual(ergebnisse, [true, false], 'genau einer darf melden');
+  db.close();
+});
+
+test('Auch bei vielen gleichzeitigen Versuchen bleibt es bei einer Meldung', () => {
+  const db = new Database(':memory:');
+  const store = createPluginStore(db, MANIFEST);
+  const stream = { id: '999', login: 'test', name: 'Test' };
+
+  const belege = () =>
+    store.belegeEinmalig(
+      'g1',
+      'gemeldet',
+      {
+        ...(store.getState('g1').gemeldet ?? {}),
+        [stream.login]: { streamId: stream.id, zeit: Date.now() },
+      },
+      (bestehend) => schonGemeldet(bestehend ?? {}, stream.login, stream.id, 60),
+    );
+
+  const treffer = Array.from({ length: 10 }, belege).filter(Boolean).length;
+  assert.equal(treffer, 1, `${treffer} Meldungen statt einer`);
+  db.close();
+});
+
+test('Eine spätere Sendung darf wieder gemeldet werden', () => {
+  // Der Schutz darf nicht dazu führen, dass am nächsten Tag nichts mehr kommt.
+  const db = new Database(':memory:');
+  const store = createPluginStore(db, MANIFEST);
+
+  // Erste Sendung, vor drei Tagen.
+  store.setState('g1', {
+    gemeldet: { gronkh: { streamId: 'alt', zeit: Date.now() - 72 * 3600_000 } },
+  });
+
+  const neu = { id: 'neu', login: 'gronkh', name: 'Gronkh' };
+  const belegt = store.belegeEinmalig(
+    'g1',
+    'gemeldet',
+    { gronkh: { streamId: neu.id, zeit: Date.now() } },
+    (bestehend) => schonGemeldet(bestehend ?? {}, neu.login, neu.id, 60),
+  );
+  assert.equal(belegt, true, 'eine neue Sendung muss durchkommen');
+  db.close();
+});
+
+test('Zwei Kanäle blockieren sich nicht gegenseitig', () => {
+  const db = new Database(':memory:');
+  const store = createPluginStore(db, MANIFEST);
+
+  const belege = (login, id) =>
+    store.belegeEinmalig(
+      'g1',
+      'gemeldet',
+      { ...(store.getState('g1').gemeldet ?? {}), [login]: { streamId: id, zeit: Date.now() } },
+      (bestehend) => schonGemeldet(bestehend ?? {}, login, id, 60),
+    );
+
+  assert.equal(belege('kanal_a', '1'), true);
+  assert.equal(belege('kanal_b', '2'), true, 'der zweite Kanal muss auch durchkommen');
+  assert.equal(belege('kanal_a', '1'), false, 'derselbe aber nicht zweimal');
+  db.close();
+});
+

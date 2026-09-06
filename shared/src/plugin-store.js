@@ -359,6 +359,36 @@ export function createPluginStore(db, manifest) {
       return neu;
     },
 
+    /**
+     * Belegt einen Platz im Merkzettel - aber nur, wenn er noch frei ist.
+     *
+     * Lesen und Schreiben laufen in **einer** Transaktion. Ohne das koennen
+     * zwei Ablaeufe denselben Stand lesen, bevor einer geschrieben hat, und
+     * beide halten sich fuer den Ersten. Genau daran lag es, dass eine
+     * Twitch-Meldung zweimal gepostet wurde: Webhook und Abfrage liefen
+     * gleichzeitig los, und das Senden an Discord dauert lange genug, dass
+     * sich beide in die Luecke schieben.
+     *
+     * Gibt `true` zurueck, wenn der Platz belegt wurde - dann und nur dann
+     * darf der Aufrufer handeln.
+     */
+    belegeEinmalig(guildId, schluessel, wert, istBelegt) {
+      const belegen = db.transaction(() => {
+        const aktuell = store.getState(guildId);
+        const bestehend = aktuell[schluessel];
+        // Die Pruefung gehoert IN die Transaktion - sonst waere nichts gewonnen.
+        if (istBelegt(bestehend)) return false;
+
+        db.prepare(`INSERT OR IGNORE INTO ${configTabelle} (guild_id) VALUES (?)`).run(guildId);
+        db.prepare(`UPDATE ${configTabelle} SET state = ? WHERE guild_id = ?`).run(
+          JSON.stringify({ ...aktuell, [schluessel]: wert }),
+          guildId,
+        );
+        return true;
+      });
+      return belegen();
+    },
+
     markDirty: markiere,
 
     /**

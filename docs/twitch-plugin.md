@@ -150,8 +150,15 @@ Pro Server sind bis zu **25 Kanäle** möglich.
 Twitch vergibt je Sendung eine ID, die über die ganze Sendung gleich bleibt.
 Der Bot merkt sich, welche ID er zuletzt gemeldet hat.
 
-Damit ist ausgeschlossen, dass Webhook und Abfrage dieselbe Sendung zweimal
-melden — auch wenn beide sie kurz nacheinander sehen.
+Entscheidend ist dabei der **Zeitpunkt**: Der Vermerk wird gesetzt, *bevor* die
+Nachricht rausgeht — und Prüfen und Vermerken passieren in einem einzigen
+Schritt. Würde erst geprüft, dann gesendet und danach vermerkt, könnten sich
+Webhook und Abfrage in die Lücke dazwischen schieben. Das Senden an Discord
+dauert lange genug dafür.
+
+> Genau so kam es in einem frühen Test zu zwei Meldungen im Abstand von drei
+> Sekunden: Der Webhook meldete, und die reguläre Abfrage hatte kurz vorher
+> denselben Stand gelesen.
 
 ---
 

@@ -110,6 +110,28 @@ export default {
 
     const twitch = createTwitchClient({ clientId, clientSecret });
 
+    /**
+     * Belegt den Platz fuer eine Sendung - nur wer true bekommt, darf melden.
+     *
+     * Der Kern gegen doppelte Meldungen: Webhook und Abfrage laufen
+     * gleichzeitig und sehen dieselbe Sendung. Wuerde jeder erst pruefen,
+     * dann senden und danach vermerken, schoeben sich beide in die Luecke
+     * dazwischen - das Senden an Discord dauert lange genug dafuer. Genau so
+     * kam es einmal zu zwei Meldungen im Abstand von drei Sekunden.
+     *
+     * Deshalb wird der Platz VOR dem Senden in einer Transaktion belegt.
+     */
+    const belegePlatz = (cfg, stream) =>
+      store.belegeEinmalig(
+        cfg.guild_id,
+        'gemeldet',
+        {
+          ...(store.getState(cfg.guild_id).gemeldet ?? {}),
+          [stream.login]: { streamId: stream.id, zeit: Date.now() },
+        },
+        (bestehend) => schonGemeldet(bestehend ?? {}, stream.login, stream.id, cfg.cooldown_min),
+      );
+
     /** Postet die Meldung fuer einen laufenden Stream. */
     const melde = async (cfg, stream, hinweis) => {
       const guildId = cfg.guild_id;
@@ -129,15 +151,7 @@ export default {
         allowedMentions: cfg.ping_role_id ? { roles: [cfg.ping_role_id] } : { parse: [] },
       });
 
-      // Merken, damit dieselbe Sendung nicht erneut gemeldet wird.
-      const merk = store.getState(guildId);
-      store.setState(guildId, {
-        gemeldet: {
-          ...(merk.gemeldet ?? {}),
-          [stream.login]: { streamId: stream.id, zeit: Date.now() },
-        },
-      });
-
+      // Der Vermerk ist schon gesetzt - siehe belegePlatz().
       return `gemeldet: ${stream.name}`;
     };
 
@@ -157,11 +171,12 @@ export default {
       if (zuLogin.size === 0) return 'kein gueltiger Kanalname';
 
       const live = await twitch.getStreams([...zuLogin.keys()]);
-      const merk = store.getState(guildId).gemeldet ?? {};
       let gemeldet = 0;
 
       for (const [login, stream] of live) {
-        if (schonGemeldet(merk, login, stream.id, cfg.cooldown_min)) continue;
+        // Belegen und pruefen in einem Schritt - wer false bekommt, war zu
+        // spaet und laesst es dem anderen.
+        if (!belegePlatz(cfg, stream)) continue;
         try {
           await melde(cfg, stream, zuLogin.get(login)?.hinweis);
           gemeldet++;
@@ -236,8 +251,7 @@ export default {
                   const treffer = eintraege.find((x) => normalizeLogin(x.login) === e.login);
                   if (!treffer) continue;
 
-                  const merk = store.getState(cfg.guild_id).gemeldet ?? {};
-                  if (schonGemeldet(merk, e.login, stream.id, cfg.cooldown_min)) continue;
+                  if (!belegePlatz(cfg, stream)) continue;
 
                   await melde(cfg, stream, treffer.hinweis);
                   log?.info(`${cfg.guild_id}: ${stream.name} live (per Webhook)`);
