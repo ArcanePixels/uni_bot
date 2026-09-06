@@ -319,6 +319,31 @@ export default {
         }
         if (neu) log?.info(`${neu} Kanal/Kanaele bei Twitch angemeldet`);
 
+        // Nach dem Anmelden nachsehen, was Twitch daraus gemacht hat. Die
+        // Meldung beim Start sagt nur, dass die Einstellungen gesetzt sind -
+        // nicht, dass es funktioniert. Genau das hat schon einmal in die Irre
+        // gefuehrt: "Webhook aktiv", waehrend keine einzige Anmeldung stand.
+        if (neu > 0) {
+          setTimeout(async () => {
+            try {
+              const jetzt = (await twitch.listSubscriptions()).filter(
+                (b) => b.type === 'stream.online' && b.callback === webhookUrl,
+              );
+              const laeuft = jetzt.filter((b) => b.status === 'enabled').length;
+              if (laeuft > 0) {
+                log?.info(`Webhook bestaetigt: ${laeuft} Kanal/Kanaele melden sich in Sekunden.`);
+              } else if (jetzt.length > 0) {
+                log?.warn(
+                  `Keine Anmeldung ist aktiv. Zustand: ${[...new Set(jetzt.map((b) => b.status))].join(', ')}. ` +
+                    `Stimmt TWITCH_WEBHOOK_URL (aktuell ${webhookUrl})?`,
+                );
+              }
+            } catch {
+              /* beim naechsten stuendlichen Durchlauf erneut */
+            }
+          }, 15_000).unref?.();
+        }
+
         // Was nicht mehr beobachtet wird, wieder abmelden - sonst sammeln
         // sich Anmeldungen an, die niemand mehr braucht.
         const gebraucht = new Set([...nutzer.values()].map((u) => String(u.id)));
@@ -363,7 +388,9 @@ export default {
     // Klar sagen, welcher Weg laeuft - und was fehlt, wenn der schnelle
     // nicht aktiv ist. Sonst sucht man im Log vergeblich nach dem Grund.
     if (offeneEreignisse && webhookUrl && webhookSecret) {
-      log?.info('Twitch bereit: Webhook aktiv, Meldung in Sekunden');
+      // Bewusst vorsichtig formuliert: Ob der Webhook wirklich funktioniert,
+      // steht erst nach der Anmeldung fest - siehe "Webhook bestaetigt".
+      log?.info('Twitch bereit: Webhook eingerichtet, Anmeldung folgt.');
     } else {
       const fehlt = [];
       if (!webhookUrl) fehlt.push('TWITCH_WEBHOOK_URL');

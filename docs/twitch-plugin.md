@@ -107,11 +107,21 @@ Der Bot meldet die Kanäle danach selbstständig bei Twitch an — beim Start un
 jedes Mal, wenn du einen Kanal hinzufügst. Kanäle, die du entfernst, meldet er
 wieder ab.
 
-Im Log siehst du, welcher Weg aktiv ist:
+Im Log siehst du, ob es geklappt hat:
 
 ```bash
 docker compose logs bot | grep -i twitch
 ```
+
+| Zeile | Bedeutung |
+|---|---|
+| `Webhook bestätigt: … melden sich in Sekunden` | Alles richtig. |
+| `Keine Anmeldung ist aktiv` | Twitch erreicht die Adresse nicht – meist ein Tippfehler in `TWITCH_WEBHOOK_URL` oder eine fehlende Proxy-Regel. |
+| `Abfrage jede Minute. Für Meldung in Sekunden fehlt …` | Der Webhook ist nicht eingerichtet. |
+
+> **Prüf die Adresse Zeichen für Zeichen.** Ein Tippfehler wie
+> `bot.example.de.de` fällt sonst nirgends auf: Caddy antwortet, der Bot meldet
+> „eingerichtet", und nur der Zustand bei Twitch verrät, dass nichts ankommt.
 
 ---
 
