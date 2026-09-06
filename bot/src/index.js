@@ -9,6 +9,7 @@ import { AuditService } from './core/audit.js';
 import { PluginHost } from './core/plugin-host.js';
 import { loadExternalPlugins } from './core/plugin-loader.js';
 import { starteAufraeumen } from './core/aufraeumen.js';
+import { starteUeberwachung } from './core/verwaiste-server.js';
 import { discoverPlugins } from '@allrounder/shared/plugin-discovery';
 import { createPluginStore } from '@allrounder/shared/plugin-store';
 
@@ -61,6 +62,16 @@ const host = new PluginHost({ client, db, settings, infractions, audit });
 // AUDIT_KEEP_DAYS und INFRACTION_KEEP_DAYS einstellbar, 0 schaltet ab.
 const stoppeAufraeumen = starteAufraeumen({ db, log });
 
+// Server, auf denen der Bot nicht mehr ist: Daten nach einer Schonfrist
+// loeschen. Ueber ORPHAN_DELETE_HOURS einstellbar, 0 schaltet das Loeschen ab.
+const stoppeUeberwachung = starteUeberwachung({
+  db,
+  // Frisch bei jedem Durchlauf - waehrend einer Stoerung ist die Liste leer,
+  // und darauf reagiert die Ueberwachung von selbst.
+  holeAnwesend: () => new Set(client.guilds.cache.map((g) => String(g.id))),
+  log,
+});
+
 /**
  * Die API schreibt in dieselbe Datei, ohne dass der Bot davon erfaehrt.
  * Statt Cache-Invalidierung ueber einen Kanal zwischen den Containern
@@ -109,7 +120,7 @@ client.on('guildDelete', (guild) => {
   }
   log.info(
     `Vom Server "${guild.name}" (${guild.id}) entfernt. ` +
-      `Die Daten bleiben erhalten - loeschen im Dashboard unter Einstellungen.`,
+      `Die Daten bleiben zunaechst erhalten - siehe ORPHAN_DELETE_HOURS.`,
   );
 });
 client.on('error', (err) => log.error('Discord-Client-Fehler', err));
@@ -124,6 +135,7 @@ async function shutdown(signal) {
   log.info(`${signal} empfangen, fahre herunter`);
   clearInterval(pollSettings);
   stoppeAufraeumen();
+  stoppeUeberwachung();
   await host.teardown();
   await client.destroy();
   db.close();

@@ -32,8 +32,16 @@ Wie man aktualisiert, steht in [docs/aktualisieren.md](docs/aktualisieren.md).
 - **Daten eines Servers löschen.** Unter Einstellungen ganz unten lässt sich
   alles entfernen, was zu einem Server gespeichert ist — inklusive Plugin-Daten.
   Zum Bestätigen muss die Server-ID abgetippt werden; ein Klick allein löscht
-  nichts. Wird der Bot von einem Server entfernt, bleiben die Daten bewusst
-  erhalten: Discord meldet das auch bei Störungen.
+  nichts.
+- **Verwaiste Server werden nach einer Schonfrist aufgeräumt.** Wird der Bot von
+  einem Server entfernt, verschwinden dessen Daten nach 24 Stunden — aber nur,
+  wenn er in dieser Zeit nicht zurückkehrt. Der Bot prüft stündlich; taucht der
+  Server wieder auf, wird die Frist verworfen.
+
+  Nicht sofort zu löschen ist Absicht: Discord meldet einen Server auch bei
+  Störungen als weg. Sieht der Bot gar keine Server, wird die Prüfung ganz
+  übersprungen — eine leere Liste heißt fast immer, dass die Verbindung steht.
+  Über `ORPHAN_DELETE_HOURS` einstellbar, `0` schaltet ab.
 - **Hinweis, wenn der Bot auf einem Server fehlt.** Vorher lief man in Seiten,
   die mit einer Discord-Fehlermeldung abbrachen, ohne den Grund zu nennen. Jetzt
   steht dort ein Hinweis mit Einladungs-Knopf — samt Auflistung, welche Rechte

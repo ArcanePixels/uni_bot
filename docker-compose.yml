@@ -31,6 +31,10 @@ services:
       # dev.twitch.tv/console/apps - ohne die Werte bleibt das Plugin still.
       TWITCH_CLIENT_ID: ${TWITCH_CLIENT_ID:-}
       TWITCH_CLIENT_SECRET: ${TWITCH_CLIENT_SECRET:-}
+      # Aufbewahrung (optional, siehe .env.example)
+      AUDIT_KEEP_DAYS: ${AUDIT_KEEP_DAYS:-}
+      INFRACTION_KEEP_DAYS: ${INFRACTION_KEEP_DAYS:-}
+      ORPHAN_DELETE_HOURS: ${ORPHAN_DELETE_HOURS:-}
       # Oeffentliche Adresse des Webhooks, z. B.
       # https://bot.deine-domain.de/twitch/webhook - Twitch nimmt nur https.
       TWITCH_WEBHOOK_URL: ${TWITCH_WEBHOOK_URL:-}

@@ -173,8 +173,34 @@ aller Plugins. Andere Server bleiben unberührt.
 > ihn in Discord entfernen — die Daten bleiben dann erhalten, bis man sie
 > bewusst löscht.
 
-**Wird der Bot von einem Server entfernt**, löscht er von sich aus nichts. Er
-schreibt nur einen Vermerk ins Log. Grund: Discord meldet dieses Ereignis auch
-bei einer Störung — Daten dann wegzuwerfen wäre unumkehrbar und im Zweifel
-falsch.
+### Wird der Bot von einem Server entfernt
+
+Dann verschwinden dessen Daten **nach 24 Stunden von selbst**. Nicht sofort:
+Discord meldet einen Server auch bei einer Störung als weg, und die Daten wären
+dann unwiederbringlich hin.
+
+Der Ablauf:
+
+1. Der Bot sieht **stündlich** nach, auf welchen Servern er ist.
+2. Fehlt einer, der Daten hat, beginnt die Frist.
+3. Taucht er wieder auf, wird die Frist **verworfen** — als wäre nichts gewesen.
+   Verschwindet er später erneut, beginnt sie von vorn.
+4. Ist er nach Ablauf immer noch weg, werden die Daten gelöscht.
+
+24 Stunden sind bewusst gewählt: Ein Discord-Ausfall dieser Länge wäre ein
+Ereignis, von dem man aus jeder Zeitung erfährt.
+
+Zwei Sicherungen dagegen, dass ein Ausfall auf deiner Seite Daten kostet:
+
+- **Sieht der Bot gar keine Server**, wird die Prüfung übersprungen. Eine leere
+  Liste heißt fast immer: Die Verbindung steht gerade nicht.
+- **Der erste Durchlauf kommt erst fünf Minuten nach dem Start.** Vorher ist die
+  Serverliste noch nicht vollständig.
+
+Über `ORPHAN_DELETE_HOURS` in der `.env` lässt sich die Frist ändern. **`0`
+schaltet das automatische Löschen ab** — dann werden verwaiste Server nur
+vermerkt, und du löschst von Hand.
+
+> Das betrifft nur den Server, von dem der Bot entfernt wurde. Alle anderen
+> bleiben unberührt.
 
