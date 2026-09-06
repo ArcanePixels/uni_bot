@@ -107,3 +107,52 @@ die Daten dort, wo sie entstehen, und niemand haftet für fremde.
 - Kein Mitlesen von Direktnachrichten
 - Keine dauerhafte Speicherung normaler Nachrichten — nur bearbeitete und
   gelöschte, und das nur bei eingeschaltetem Nachrichten-Log
+
+---
+
+## Wenn mehrere Server denselben Bot nutzen
+
+Ein Bot kann auf beliebig vielen Discord-Servern sein. Wer dort Administrator
+ist, verwaltet seinen Server über dasselbe Dashboard. Was dabei geteilt wird und
+was nicht:
+
+### Getrennt — jeder sieht nur seinen Server
+
+Alles, was im Dashboard eingestellt wird: Automod, Willkommensnachricht, Regeln,
+Twitch-Kanäle, geplante Posts, Verstöße, Tickets, Audit-Log.
+
+Jede Tabelle hat eine `guild_id`, jede Abfrage filtert danach. Wer sich anmeldet,
+sieht ausschließlich Server, auf denen er selbst Administrator ist oder „Server
+verwalten" darf — das fragt die API bei **jedem** Aufruf bei Discord nach, nicht
+nur beim Login.
+
+### Geteilt — technisch nötig, aber unbedenklich
+
+| Eintrag | Warum das in Ordnung ist |
+|---|---|
+| `DISCORD_TOKEN` | Es ist *ein* Bot auf mehreren Servern — so funktionieren Discord-Bots. |
+| `TWITCH_CLIENT_ID` / `_SECRET` | Nur ein Ausweis für „diese Anwendung darf fragen, wer live ist". Gibt **keinen** Zugriff auf dein Twitch-Konto: kein Streamen, kein Ändern, nur öffentliche Daten. Jeder Server trägt seine eigenen Kanäle ein. |
+
+Einzige praktische Grenze: Twitch begrenzt Anfragen pro Anwendung. Bei einer
+Handvoll Server ist das weit entfernt von jeder Schwelle.
+
+### Nur für den Betreiber
+
+| Eintrag | Bedeutung |
+|---|---|
+| `OWNER_IDS` | **Der wichtigste.** Nur wer hier steht, kann Sicherungen abrufen — und die enthalten die Daten *aller* Server. Trag hier ausschließlich deine eigene Discord-ID ein. |
+| `AUTH_SECRET`, `API_TOKEN`, `DISCORD_CLIENT_SECRET` | Verlassen den Server nie, der Browser sieht sie nicht. |
+
+> **Bevor du jemanden einlädst:** Prüf, dass in `OWNER_IDS` nur deine eigene
+> Discord-ID steht. Ist der Eintrag leer, sind die Sicherungen für niemanden
+> abrufbar — auch für dich nicht.
+
+### Was du als Betreiber sehen kannst
+
+Technisch alles, was der Bot sieht: Einstellungen, Verstöße und — falls jemand
+den Nachrichten-Log einschaltet — die dort mitgeschriebenen Nachrichten seines
+Servers. Die liegen auf **deiner** Platte.
+
+Das ist keine Lücke, sondern die Folge davon, dass du den Bot betreibst. Sag es
+den Leuten aber, bevor sie ihn nutzen — deren Mitglieder wissen nichts davon.
+
