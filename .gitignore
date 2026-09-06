@@ -20,11 +20,16 @@ backups/
 *.sqlite-wal
 
 # Eigene Plugins der jeweiligen Installation bleiben draussen. Was mitgeliefert
-# wird - Anleitung, Beispiel und das Regeln-Plugin - gehoert aber ins Repo.
+# wird, gehoert aber ins Repo.
+#
+# ACHTUNG bei neuen mitgelieferten Plugins: Ohne eigene !-Zeile landen sie
+# NICHT im Repo - und fehlen dann auf jedem Server, ohne dass es auffaellt.
+# Genau das ist mit plugins/twitch/ passiert.
 plugins/*
 !plugins/README.md
 !plugins/*.js.txt
 !plugins/regeln/
+!plugins/twitch/
 
 # Betriebssystem
 .DS_Store

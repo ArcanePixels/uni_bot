@@ -1,0 +1,106 @@
+{
+  "name": "twitch",
+  "label": "Twitch",
+  "icon": "play",
+  "description": "Meldet im Discord, wenn ein Twitch-Kanal live geht.",
+  "version": "1.0.0",
+  "ui": {
+    "sections": [
+      {
+        "type": "list",
+        "key": "kanaele",
+        "title": "Beobachtete Kanäle",
+        "description": "Kanalname oder ganze Twitch-Adresse – beides geht. Bis zu 25 Kanäle.",
+        "max": 25,
+        "itemLabel": "login",
+        "fields": [
+          {
+            "key": "login",
+            "label": "Twitch-Kanal",
+            "type": "text",
+            "required": true,
+            "maxLength": 120,
+            "placeholder": "gronkh oder https://twitch.tv/gronkh"
+          },
+          {
+            "key": "hinweis",
+            "label": "Eigener Text (optional)",
+            "type": "text",
+            "maxLength": 200,
+            "placeholder": "Steht über der Meldung, z. B. „Unser Streamer ist da!“"
+          }
+        ]
+      },
+      {
+        "type": "form",
+        "title": "Wohin und wie",
+        "fields": [
+          {
+            "key": "channel_id",
+            "label": "Kanal",
+            "type": "channel",
+            "requiresPermissions": [
+              "VIEW_CHANNEL",
+              "SEND_MESSAGES",
+              "EMBED_LINKS",
+              "READ_MESSAGE_HISTORY"
+            ],
+            "help": "In welchen Discord-Kanal die Meldung kommt."
+          },
+          {
+            "key": "ping_role_id",
+            "label": "Rolle anpingen (optional)",
+            "type": "role",
+            "help": "Wird bei jeder Live-Meldung erwähnt. Leer lassen für keine Erwähnung."
+          },
+          {
+            "key": "text",
+            "label": "Nachrichtentext",
+            "type": "text",
+            "maxLength": 200,
+            "default": "{name} ist jetzt live!",
+            "help": "Platzhalter: {name} für den Kanalnamen, {game} für das Spiel, {title} für den Streamtitel."
+          },
+          {
+            "key": "color",
+            "label": "Farbe",
+            "type": "color",
+            "default": "#9146ff"
+          },
+          {
+            "key": "zeige_vorschau",
+            "label": "Vorschaubild anzeigen",
+            "type": "boolean",
+            "default": true
+          },
+          {
+            "key": "cooldown_min",
+            "label": "Sperrzeit in Minuten",
+            "type": "number",
+            "min": 0,
+            "max": 1440,
+            "default": 60,
+            "help": "Verhindert eine neue Meldung, wenn jemand kurz hintereinander mehrfach live geht. 0 schaltet die Sperre ab."
+          }
+        ]
+      },
+      {
+        "type": "actions",
+        "title": "Prüfen",
+        "description": "Der Bot prüft von selbst. Über den Webhook kommt die Meldung in Sekunden, sonst rund jede Minute.",
+        "actions": [
+          {
+            "key": "publish",
+            "label": "Jetzt prüfen",
+            "style": "primary",
+            "requires": [
+              "channel_id"
+            ],
+            "requiresList": "kanaele",
+            "help": "Fragt sofort bei Twitch nach, wer gerade live ist."
+          }
+        ]
+      }
+    ]
+  }
+}
