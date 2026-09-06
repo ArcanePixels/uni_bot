@@ -41,7 +41,7 @@ export default async function WillkommenPage() {
       <header className="wk-kopf">
         <span className="brand">
           <span className="brand-mark">
-            <Logo width={22} height={22} />
+            <Logo width={20} height={20} />
           </span>
           Discord Allrounder
         </span>
@@ -113,7 +113,12 @@ export default async function WillkommenPage() {
         </a>
       </section>
 
-      <footer className="wk-fuss">ein Werkzeug von ArcanePixels</footer>
+      <footer className="wk-fuss">
+        {/* Hier steht das volle Logo samt Schriftzug - der Platz reicht, damit
+            er lesbar bleibt. In der Kopfzeile waere er nur ein grauer Streifen. */}
+        <Logo width={104} height={104} variante="voll" />
+        <span>ein Werkzeug von ArcanePixels</span>
+      </footer>
     </div>
   );
 }

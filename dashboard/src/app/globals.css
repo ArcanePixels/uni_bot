@@ -4,8 +4,12 @@
  * Discord nicht fremd wirkt, aber eigenstaendig bleibt.
  *
  * --accent wird pro Server aus dessen Icon berechnet und zur Laufzeit gesetzt
- * (siehe AccentProvider). Der Wert hier ist die ArcanePixels-Markenfarbe und
- * gilt ueberall, wo noch kein Server gewaehlt ist.
+ * (siehe AccentProvider). Der Wert hier gilt ueberall, wo noch kein Server
+ * gewaehlt ist.
+ *
+ * --marke ist davon getrennt und bleibt IMMER das ArcanePixels-Orange. Das Logo
+ * haengt daran, damit es nicht die Farbe wechselt, sobald ein Server mit
+ * anderem Icon offen ist.
  */
 
 :root {
@@ -21,9 +25,13 @@
   --text-dim: #9aa0b0;
   --text-faint: #6b7180;
 
-  --accent: #7c5cff;
-  --accent-soft: rgba(124, 92, 255, 0.14);
-  --accent-text: #ffffff;
+  --accent: #ff9f20;
+  --accent-soft: rgba(255, 159, 32, 0.14);
+  --accent-text: #1a1206;
+
+  /* Markenfarben - aus dem Logo entnommen, nicht geschaetzt. */
+  --marke: #ff9f20;
+  --marke-bg: #0e0019;
 
   --danger: #f0484f;
   --danger-soft: rgba(240, 72, 79, 0.12);
@@ -142,11 +150,15 @@ h3 {
 .brand:hover {
   text-decoration: none;
 }
+/* Die Kachel traegt die Logofarben, nicht den Serverakzent: Das Logo soll
+   ueberall gleich aussehen, auch wenn daneben ein Server mit gruenem Icon
+   offen ist. */
 .brand-mark {
   width: 26px;
   height: 26px;
   border-radius: 7px;
-  background: linear-gradient(135deg, var(--accent), color-mix(in srgb, var(--accent) 50%, #1b1f2b));
+  background: var(--marke-bg);
+  color: var(--marke);
   display: grid;
   place-items: center;
   flex-shrink: 0;
@@ -1343,10 +1355,19 @@ td.dim {
 
 .wk-fuss {
   margin-top: 56px;
-  padding-top: 20px;
+  padding-top: 24px;
   border-top: 1px solid var(--border);
   font-size: 12.5px;
   color: var(--text-faint);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  text-align: center;
+}
+/* Das Logo im Fuss traegt die Markenfarbe, nicht den Serverakzent. */
+.wk-fuss .ap-logo {
+  color: var(--marke);
 }
 
 @media (max-width: 640px) {

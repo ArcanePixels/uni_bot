@@ -7,7 +7,7 @@ export function TopBar({ user, guildName = null, guildIcon = null }) {
       <div className="inner">
         <a href="/" className="brand">
           <span className="brand-mark">
-            <Logo />
+            <Logo width={20} height={20} />
           </span>
           ArcanePixels
         </a>

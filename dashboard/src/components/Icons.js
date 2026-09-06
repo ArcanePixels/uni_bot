@@ -102,13 +102,42 @@ export const Discord = (p) => (
   </svg>
 );
 
-export const Logo = (p) => (
-  <svg viewBox="0 0 24 24" fill="none" width={15} height={15} {...p}>
-    {/* Stilisiertes "A" aus Bildpunkten - passend zum Namen ArcanePixels. */}
-    <path d="M12 4l7 16h-3.5l-1.2-3H9.7l-1.2 3H5l7-16z" fill="#fff" opacity="0.95" />
-    <rect x="10.6" y="12" width="2.8" height="2.8" fill="#fff" opacity="0.55" />
-  </svg>
-);
+/**
+ * Das ArcanePixels-Logo - der Sensenmann mit der Kamera.
+ *
+ * Anders als die uebrigen Icons steckt die Zeichnung nicht hier im Quelltext,
+ * sondern in `public/` (rund 10 KB - zu viel, um sie in jede Seite zu schreiben).
+ * Eingebunden wird sie als CSS-Maske: Der Browser laedt und cacht die Datei
+ * einmal, gefaerbt wird trotzdem per CSS, `color` wirkt also wie bei den
+ * anderen Icons auch.
+ *
+ * `variante="mark"` (Standard) zeigt nur die Figur. Der Schriftzug im vollen
+ * Logo zerfaellt unterhalb von etwa 80 px zu einem grauen Streifen und stuende
+ * neben dem Wort "ArcanePixels" ohnehin doppelt - `variante="voll"` lohnt sich
+ * daher nur auf grossen Flaechen.
+ *
+ * Erzeugt werden beide Dateien von `tools/logo-bauen.mjs`.
+ */
+export const Logo = ({ width = 15, height = 15, variante = 'mark', className, style, ...p }) => {
+  const datei = variante === 'voll' ? '/logo.svg' : '/logo-mark.svg';
+  const maske = `url(${datei}) center / contain no-repeat`;
+  return (
+    <span
+      aria-hidden="true"
+      className={['ap-logo', className].filter(Boolean).join(' ')}
+      style={{
+        display: 'inline-block',
+        width,
+        height,
+        backgroundColor: 'currentColor',
+        WebkitMask: maske,
+        mask: maske,
+        ...style,
+      }}
+      {...p}
+    />
+  );
+};
 
 /** Stecker - der Standard fuer Plugins ohne eigenes Symbol. */
 export const Plug = (p) => (
