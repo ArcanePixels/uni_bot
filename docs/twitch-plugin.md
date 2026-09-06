@@ -105,7 +105,7 @@ docker compose logs bot | grep -i twitch
 | **Rolle anpingen** | wird bei jeder Meldung erwähnt; leer lassen für keine Erwähnung |
 | **Nachrichtentext** | Platzhalter: `{name}`, `{game}`, `{title}`, `{url}` |
 | **Farbe** | Streifen links an der Nachricht |
-| **Vorschaubild** | Standbild aus dem laufenden Stream |
+| **Standbild** | Das große Bild unten in der Meldung. Aus: nur die Textzeile – kompakter bei vielen Kanälen |
 | **Sperrzeit** | verhindert eine erneute Meldung, wenn jemand kurz hintereinander mehrfach live geht |
 
 **Zur Sperrzeit:** Bricht die Verbindung eines Streamers kurz ab, ist er

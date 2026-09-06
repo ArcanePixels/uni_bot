@@ -69,9 +69,10 @@
           },
           {
             "key": "zeige_vorschau",
-            "label": "Vorschaubild anzeigen",
+            "label": "Standbild aus dem Stream zeigen",
             "type": "boolean",
-            "default": true
+            "default": true,
+            "help": "Das große Bild unten in der Meldung, das Twitch aus dem laufenden Stream liefert. Aus: nur die Textzeile – kompakter, wenn mehrere Kanäle beobachtet werden."
           },
           {
             "key": "cooldown_min",
