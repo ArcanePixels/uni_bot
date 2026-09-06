@@ -23,6 +23,16 @@ Wie man aktualisiert, steht in [docs/aktualisieren.md](docs/aktualisieren.md).
   [docs/twitch-plugin.md](docs/twitch-plugin.md).
 - Plugins können über `store.allGuilds()` alle Server abfragen, für die sie
   Daten haben — für Plugins, die regelmäßig von sich aus tätig werden.
+- `DASHBOARD_BIND` macht die Port-Bindung einstellbar. Läuft ein Reverse Proxy
+  davor, gehört Port 3000 nicht nach außen: `DASHBOARD_BIND=127.0.0.1` in die
+  `.env`, dann ist das Dashboard nur noch über HTTPS erreichbar.
+
+### Sicherheit
+
+- **Express auf 5.2.1**. Die alte Version hatte drei gemeldete Lücken in
+  `qs` und `body-parser` (Denial of Service). Das wiegt schwerer als vorher,
+  weil die API mit dem Twitch-Webhook erstmals einen Endpunkt hat, der aus dem
+  Internet erreichbar ist. `npm audit` meldet jetzt keine Funde mehr.
 
 ## [1.1.0] – 2026-08-23
 

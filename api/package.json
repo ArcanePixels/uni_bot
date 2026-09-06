@@ -10,7 +10,7 @@
   "dependencies": {
     "@allrounder/shared": "*",
     "better-sqlite3": "^11.7.0",
-    "express": "^4.21.2",
-    "croner": "^9.0.0"
+    "croner": "^9.0.0",
+    "express": "^5.2.1"
   }
 }
