@@ -144,6 +144,12 @@ steht der Grund:
 Verwarnen bleibt auch bei höheren Rollen möglich — es greift niemanden an,
 sondern notiert nur etwas.
 
+> **Der Automod ist davon nicht betroffen.** Er läuft im Bot und prüft die
+> Rangfolge über discord.js selbst (`moderatable`, `kickable`, `bannable`).
+> Kann er eine Maßnahme nicht ausführen, überspringt er sie — der Verstoß wird
+> aber trotzdem gezählt und protokolliert, die Eskalation bleibt also
+> vollständig.
+
 **Befehle** — eigene Textbefehle anlegen, Nachrichten-Log einsehen,
 Sicherungen verwalten. Ausführlich in
 [befehle-und-sicherung.md](befehle-und-sicherung.md).
