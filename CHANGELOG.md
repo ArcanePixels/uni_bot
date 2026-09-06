@@ -29,6 +29,11 @@ Wie man aktualisiert, steht in [docs/aktualisieren.md](docs/aktualisieren.md).
 
 ### Hinzugefügt
 
+- **Daten eines Servers löschen.** Unter Einstellungen ganz unten lässt sich
+  alles entfernen, was zu einem Server gespeichert ist — inklusive Plugin-Daten.
+  Zum Bestätigen muss die Server-ID abgetippt werden; ein Klick allein löscht
+  nichts. Wird der Bot von einem Server entfernt, bleiben die Daten bewusst
+  erhalten: Discord meldet das auch bei Störungen.
 - **Hinweis, wenn der Bot auf einem Server fehlt.** Vorher lief man in Seiten,
   die mit einer Discord-Fehlermeldung abbrachen, ohne den Grund zu nennen. Jetzt
   steht dort ein Hinweis mit Einladungs-Knopf — samt Auflistung, welche Rechte

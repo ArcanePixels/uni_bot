@@ -12,6 +12,7 @@ import { wizardRoutes } from './routes/wizard.js';
 import { backupRoutes } from './routes/backup.js';
 import { commandRoutes } from './routes/commands.js';
 import { pluginRoutes } from './routes/plugins.js';
+import { guildDatenRoutes } from './routes/guild-daten.js';
 import { twitchWebhookRoutes, ensureTwitchEventTable } from './routes/twitch-webhook.js';
 
 /**
@@ -69,6 +70,7 @@ export function createApp(
   guilds.use(featureRoutes(db, botToken));
   guilds.use(wizardRoutes(db, botToken));
   guilds.use(commandRoutes(db));
+  guilds.use(guildDatenRoutes(db));
 
   // Plugins: eine Route fuer beliebig viele Erweiterungen. Steht bewusst am
   // Ende, damit ein Plugin keinen Endpunkt des Grundsystems verdecken kann.

@@ -89,6 +89,29 @@ client.on('messageReactionRemove', (r, u) => host.dispatch('messageReactionRemov
 client.on('interactionCreate', (i) => host.dispatch('interactionCreate', i));
 client.on('messageUpdate', (b, a) => host.dispatch('messageUpdate', b, a));
 client.on('messageDelete', (m) => host.dispatch('messageDelete', m));
+
+/**
+ * Der Bot wurde von einem Server entfernt.
+ *
+ * Hier wird **nicht** geloescht. Discord feuert dieses Ereignis auch bei einem
+ * Ausfall oder waehrend einer Stoerung - die Daten dann wegzuwerfen waere
+ * unumkehrbar und im Zweifel falsch.
+ *
+ * Stattdessen ein Vermerk im Log: Wer aufraeumen will, tut das bewusst ueber
+ * das Dashboard oder den Endpunkt.
+ */
+client.on('guildDelete', (guild) => {
+  if (!guild?.available) {
+    // available === false heisst: Discord hat gerade eine Stoerung, der
+    // Server ist nur voruebergehend weg.
+    log.warn(`Server ${guild?.id} voruebergehend nicht erreichbar (Discord-Stoerung)`);
+    return;
+  }
+  log.info(
+    `Vom Server "${guild.name}" (${guild.id}) entfernt. ` +
+      `Die Daten bleiben erhalten - loeschen im Dashboard unter Einstellungen.`,
+  );
+});
 client.on('error', (err) => log.error('Discord-Client-Fehler', err));
 client.on('shardError', (err) => log.error('Gateway-Fehler', err));
 

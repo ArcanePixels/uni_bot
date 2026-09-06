@@ -56,6 +56,12 @@ export const api = {
   getMeta: (guildId) => request(g(guildId, '/meta')),
   getAccent: (guildId) => request(g(guildId, '/accent')),
   getBotStatus: (guildId) => request(g(guildId, '/bot-status')),
+  getGuildDaten: (guildId) => request(g(guildId, '/daten')),
+  loescheGuildDaten: (guildId, bestaetigung, actorId) =>
+    request(g(guildId, '/daten/loeschen'), {
+      method: 'POST',
+      body: JSON.stringify({ bestaetigung, actorId }),
+    }),
 
   getSettings: (guildId) => request(g(guildId, '/settings')),
   saveSettings: (guildId, settings) =>

@@ -156,3 +156,25 @@ Servers. Die liegen auf **deiner** Platte.
 Das ist keine Lücke, sondern die Folge davon, dass du den Bot betreibst. Sag es
 den Leuten aber, bevor sie ihn nutzen — deren Mitglieder wissen nichts davon.
 
+---
+
+## Daten eines Servers löschen
+
+Dashboard → **Einstellungen** → ganz unten „Alle Daten dieses Servers löschen".
+
+Dort steht, wie viele Einträge betroffen sind. Zum Bestätigen muss die Server-ID
+abgetippt werden — ein Klick allein löscht nichts.
+
+Entfernt wird **alles**, was zu diesem Server gespeichert ist: Einstellungen,
+Verstöße, geplante Posts, Regeln, Tickets, Panels, Nachrichten-Log und die Daten
+aller Plugins. Andere Server bleiben unberührt.
+
+> Das lässt sich nicht rückgängig machen. Wer nur den Bot loswerden will, kann
+> ihn in Discord entfernen — die Daten bleiben dann erhalten, bis man sie
+> bewusst löscht.
+
+**Wird der Bot von einem Server entfernt**, löscht er von sich aus nichts. Er
+schreibt nur einen Vermerk ins Log. Grund: Discord meldet dieses Ereignis auch
+bei einer Störung — Daten dann wegzuwerfen wäre unumkehrbar und im Zweifel
+falsch.
+

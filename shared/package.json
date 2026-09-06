@@ -13,7 +13,8 @@
     "./plugin-manifest": "./src/plugin-manifest.js",
     "./plugin-discovery": "./src/plugin-discovery.js",
     "./plugin-store": "./src/plugin-store.js",
-    "./twitch": "./src/twitch.js"
+    "./twitch": "./src/twitch.js",
+    "./guild-loeschen": "./src/guild-loeschen.js"
   },
   "dependencies": {
     "better-sqlite3": "^11.7.0"

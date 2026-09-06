@@ -244,3 +244,20 @@ export async function moderateMember(guildId, payload) {
     return api.moderate(guildId, { ...payload, actorId: session.user.id });
   });
 }
+
+/**
+ * Loescht alle Daten eines Servers.
+ *
+ * Die Berechtigung prueft `guarded` wie ueberall. Zusaetzlich muss die
+ * Server-ID zur Bestaetigung mitkommen - ein versehentlicher Aufruf trifft
+ * so nicht die falschen Daten.
+ */
+export async function loescheGuildDaten(guildId, bestaetigung) {
+  return guarded(
+    guildId,
+    (session) => api.loescheGuildDaten(guildId, bestaetigung, session?.user?.id),
+    // Danach stimmt nichts mehr, was im Layout zwischengespeichert war.
+    { scope: 'layout' },
+  );
+}
+

@@ -1,13 +1,17 @@
 import { api, ApiError } from '@/lib/api.js';
 import { Alert } from '@/components/Icons.js';
 import { SettingsForm } from '@/components/SettingsForm.js';
+import { DatenLoeschen } from '@/components/DatenLoeschen.js';
 import { checkConsistency, checkPlausibility } from '@/lib/consistency.js';
-import { saveSettings } from '../actions.js';
+import { saveSettings, loescheGuildDaten } from '../actions.js';
 
 export default async function SettingsPage({ params }) {
   const { guildId } = await params;
 
   let schema, settings, meta;
+  // Was fuer diesen Server gespeichert ist - nur fuer die Anzeige im
+  // Loeschbereich. Faellt es aus, laedt die Seite trotzdem.
+  let daten = null;
   try {
     // Parallel laden - drei Roundtrips nacheinander waeren spuerbar langsamer.
     [schema, settings, meta] = await Promise.all([
@@ -15,6 +19,7 @@ export default async function SettingsPage({ params }) {
       api.getSettings(guildId),
       api.getMeta(guildId),
     ]);
+    daten = await api.getGuildDaten(guildId).catch(() => null);
   } catch (err) {
     const message = err instanceof ApiError ? err.message : 'Laden fehlgeschlagen.';
     return (
@@ -59,11 +64,18 @@ export default async function SettingsPage({ params }) {
       )}
 
       <SettingsForm
-      guildId={guildId}
-      schema={schema}
-      initialSettings={settings}
-      meta={meta}
+        guildId={guildId}
+        schema={schema}
+        initialSettings={settings}
+        meta={meta}
         saveAction={saveSettings}
+      />
+
+      <DatenLoeschen
+        guildId={guildId}
+        guildName={meta?.guild?.name}
+        daten={daten}
+        loeschenAction={loescheGuildDaten}
       />
     </>
   );

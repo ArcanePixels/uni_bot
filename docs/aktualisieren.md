@@ -54,8 +54,26 @@ mit „Restore failures" abbrechen, wenn er von einem Windows-Rechner mitkam.
 |---|---|
 | Deine `.env` | bleibt unangetastet (steht in `.gitignore`) |
 | Datenbank | bleibt im Docker-Volume, wird bei Bedarf erweitert |
+| **Einstellungen aller Server** | **bleiben erhalten – auch die fremder Nutzer** |
 | Eigene Plugins | bleiben im Ordner `plugins/` liegen |
 | Slash-Commands | werden beim Start neu bei Discord angemeldet |
+
+### Warum Einstellungen ein Update überleben
+
+Die Daten liegen in einem Docker-Volume (`botdata`), nicht im Image. Ein neues
+Image ersetzt den Programmcode, nicht die Daten.
+
+Beim Start legt der Bot fehlende Tabellen an — **jede mit `IF NOT EXISTS`**.
+Bestehende bleiben unberührt. Im gesamten Schema gibt es kein `DROP`, kein
+`DELETE` und kein `TRUNCATE`.
+
+Bringt ein Update ein Plugin mit einem neuen Feld mit, kommt die Spalte dazu;
+die vorhandenen Werte bleiben stehen. Das ist durch Tests abgesichert
+(`shared/test/update-sicher.test.js`) — sie stellen genau diesen Fall nach.
+
+> Das Volume wird nur bei `docker compose down -v` gelöscht. Das `-v` ist der
+> Unterschied: **ohne** bleiben die Daten, **mit** sind sie weg. Zum
+> Aktualisieren wird es nie gebraucht.
 
 Neue Einstellungen bekommen ihre Standardwerte, ohne dass du etwas tun musst —
 bestehende Werte werden nicht überschrieben.
