@@ -16,6 +16,12 @@ Anwendung registrieren — kostenlos, dauert zwei Minuten.
 | Name | frei wählbar, z. B. „Mein Discord-Bot" |
 | OAuth Redirect URL | `http://localhost` (wird nicht benutzt, muss aber ausgefüllt sein) |
 | Kategorie | Chat Bot |
+| Client Type | **Confidential** (vertraulich) |
+
+> **Warum vertraulich?** Nur so gibt Twitch ein Client-Secret aus — und ohne das
+> kann der Bot sich nicht anmelden. „Öffentlich" ist für Apps gedacht, die beim
+> Nutzer laufen (Browser, Handy) und nichts geheim halten können. Dein Bot läuft
+> auf deinem Server, das Secret steht in der `.env` und verlässt die Maschine nie.
 
 Danach **Client-ID** notieren und über *New Secret* ein **Client-Secret**
 erzeugen. Das Secret wird nur einmal angezeigt.
