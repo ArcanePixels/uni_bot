@@ -5,10 +5,6 @@
       "root": "api",
       "framework": "express"
     },
-    "bot": {
-      "root": "bot",
-      "runtime": "container"
-    },
     "dashboard": {
       "root": "dashboard",
       "framework": "nextjs"
